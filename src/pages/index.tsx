@@ -35,14 +35,22 @@ function AuthShowcase() {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
+    <div className="flex flex-col items-center justify-center gap-10">
+      <p className="grid grid-rows-2 gap-y-10 text-center text-2xl text-white">
+        {sessionData && (
+          <span className="text-3xl">Tjena {sessionData.user?.name}!</span>
+        )}
+        {secretMessage && (
+          <Link className="btn btn-primary" href="/restaurant">
+            Gå vidare
+          </Link>
+        )}
       </p>
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
+        onClick={
+          sessionData ? () => void signOut() : () => void signIn("discord")
+        }
       >
         {sessionData ? "Logga out" : "Logga in"}
       </button>
