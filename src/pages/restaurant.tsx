@@ -49,7 +49,7 @@ export default function Restaurant() {
   return (
     <>
       <Head>
-        <title>Olé</title>
+        <title>MQ - Restaurang</title>
         <meta name="description" content="Välj restaurang" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -87,7 +87,7 @@ export default function Restaurant() {
               </ul>
             </div>
             <Link
-              href="/games"
+              href="/quiz"
               className={
                 "btn ml-6 transition-colors duration-300" +
                 (restaurantSelected ? " btn-primary" : " btn-disabled")

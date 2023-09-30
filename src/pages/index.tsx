@@ -8,19 +8,18 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Olé</title>
-        <meta
-          name="description"
-          content="En webapp för vadslagning bland dina vänner."
-        />
+        <title>MQ</title>
+        <meta name="description" content="En webapp för musikquiz." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className=" flex min-h-screen flex-col items-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <h1 className="text-6xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-            Olé
-          </h1>
-          <AuthShowcase />
+      <main className="hero min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+        <div className="hero-content text-center">
+          <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+            <h1 className="text-6xl font-extrabold tracking-tight text-white sm:text-[5rem]">
+              MQ
+            </h1>
+            <AuthShowcase />
+          </div>
         </div>
       </main>
     </>
@@ -49,9 +48,7 @@ function AuthShowcase() {
       </p>
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={
-          sessionData ? () => void signOut() : () => void signIn("discord")
-        }
+        onClick={sessionData ? () => void signOut() : () => void signIn()}
       >
         {sessionData ? "Logga out" : "Logga in"}
       </button>
