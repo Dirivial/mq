@@ -6,7 +6,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
-import Email from "next-auth/providers/email";
+import EmailProvider from "next-auth/providers/email";
 
 function MyAdapter(): Adapter {
   const prisma = new PrismaClient();
@@ -22,8 +22,7 @@ authOptions.providers = [
     clientId: (process.env.DISCORD_CLIENT_ID ??= ""),
     clientSecret: (process.env.DISCORD_CLIENT_SECRET ??= ""),
   }),
-  Email({
-    type: "email",
+  EmailProvider({
     async sendVerificationRequest({ identifier: email, url }) {
       // Call the cloud Email provider API for sending emails
       // See https://docs.sendgrid.com/api-reference/mail-send/mail-send
