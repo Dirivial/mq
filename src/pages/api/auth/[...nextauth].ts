@@ -6,6 +6,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
+import Email from "next-auth/providers/email";
 
 function MyAdapter(): Adapter {
   const prisma = new PrismaClient();
@@ -21,8 +22,7 @@ authOptions.providers = [
     clientId: (process.env.DISCORD_CLIENT_ID ??= ""),
     clientSecret: (process.env.DISCORD_CLIENT_SECRET ??= ""),
   }),
-  {
-    id: "sendgrid",
+  Email({
     type: "email",
     async sendVerificationRequest({ identifier: email, url }) {
       // Call the cloud Email provider API for sending emails
@@ -50,11 +50,12 @@ authOptions.providers = [
       });
 
       if (!response.ok) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const { errors } = await response.json();
         throw new Error(JSON.stringify(errors));
       }
     },
-  },
+  }),
 ];
 
 export default NextAuth(authOptions);
