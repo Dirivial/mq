@@ -49,6 +49,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    rank          String    @default("user")
 }
 
 model VerificationToken {
@@ -59,10 +60,29 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-model Restaurant {
-    id        Int      @id @default(autoincrement())
+model Question {
+    id           Int                  @id @default(autoincrement())
+    type         String
+    content      String
+    answer       String // Will there be questions where the user types in answer? If so, this should probably be an array
+    falseAnswers String[]
+    lastPicked   DateTime
+    categories   QuestionToCategory[]
+}
+
+model Category {
+    id        Int                  @id @default(autoincrement())
     name      String
-    address   String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    color     String
+    questions QuestionToCategory[]
+}
+
+// Many-to-Many relationship between questions and categories -> a question can belong in multiple categories
+model QuestionToCategory {
+    question   Question @relation(fields: [questionId], references: [id])
+    questionId Int
+    category   Category @relation(fields: [categoryId], references: [id])
+    categoryId Int
+
+    @@id([questionId, categoryId])
 }

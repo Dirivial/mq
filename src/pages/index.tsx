@@ -41,7 +41,7 @@ function AuthShowcase() {
           <span className="text-3xl">Tjena {sessionData.user?.name}!</span>
         )}
         {secretMessage && (
-          <Link className="btn btn-primary" href="/restaurant">
+          <Link className="btn btn-primary" href="/quizmaster">
             Gå vidare
           </Link>
         )}
@@ -50,7 +50,7 @@ function AuthShowcase() {
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
         onClick={sessionData ? () => void signOut() : () => void signIn()}
       >
-        {sessionData ? "Logga out" : "Logga in"}
+        {sessionData ? "Logga ut" : "Logga in"}
       </button>
     </div>
   );
