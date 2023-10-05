@@ -137,11 +137,13 @@ function Tabber(props: TabberInterface) {
     switch (props.currentTab) {
       case 0:
         props.addCategory(mainInput, "#000000");
+        break;
       case 1:
         const foundId = props.categories.find((c) => c.name == mainInput)?.id;
         if (foundId) {
           props.deleteCategory(foundId);
         }
+        break;
     }
     setMainInput("");
   };
@@ -234,14 +236,18 @@ function DropDownFilterThing(props: DropDownFilterThingInterface) {
           onChange={(e) => props.setSearch(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <ul className="menu dropdown-content rounded-box z-[1] mt-2 w-52 bg-base-100 p-2 shadow">
+        <ul
+          tabIndex={0}
+          className="menu dropdown-content rounded-box z-[10] mt-2 w-52 bg-base-100 p-2 shadow"
+        >
           {filteredEntries.map((entry, index) => (
-            <li
-              className="dropdown-item rounded-lg p-2 hover:bg-base-200"
-              key={index}
-              onClick={() => props.setSearch(entry)}
-            >
-              {entry}
+            <li className="" key={index}>
+              <a
+                className="z-20 rounded-lg p-2 hover:bg-base-200"
+                onClick={() => props.setSearch(entry)}
+              >
+                {entry}
+              </a>
             </li>
           ))}
         </ul>
