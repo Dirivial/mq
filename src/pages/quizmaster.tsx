@@ -4,6 +4,11 @@ import { useState } from "react";
 
 import { api } from "~/utils/api";
 
+type Track = {
+  id: number;
+  preview: string;
+};
+
 const exampleQuiz = {
   name: "Example Quiz",
   questions: [
@@ -58,6 +63,7 @@ export default function QuizMaster() {
   const { data: sessionData } = useSession();
 
   const [currentQuestion, setCurrentQuestion] = useState(-1);
+  const [currentPreview, setCurrentPreview] = useState("");
 
   /*
   Pritority 1: Connect to deezer API and play a couple of songs.
@@ -67,15 +73,16 @@ export default function QuizMaster() {
   Priority 3: Automatically go to the next question after the song has finished playing, and some thinking time.
   */
 
-  const startQuiz = () => {
+  const startQuiz = async () => {
     setCurrentQuestion(0);
 
-    const url = exampleQuiz.questions.at(0)?.url;
+    const url =
+      "https://cors-anywhere.herokuapp.com/" + exampleQuiz.questions.at(0)?.url;
     console.log("Fetching with url: " + url);
     if (url === undefined) return;
 
     // Use the fetch function to make the GET request
-    fetch(url, {
+    await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -83,17 +90,24 @@ export default function QuizMaster() {
       },
     })
       .then((response) => {
+        console.log(response);
+
         // Check if the response status is OK (200)
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error("Network response was not ok: " + response.status);
         }
 
         // Parse the response body as JSON (assuming it's JSON data)
-        return response.json();
+        return response.json() as Promise<Track>;
       })
       .then((data) => {
         // Handle the data returned from the server
         console.log(data);
+        if (data) {
+          const preview = data.preview;
+          const audio = new Audio(preview);
+          void audio.play();
+        }
       })
       .catch((error) => {
         // Handle any errors that occurred during the fetch request
@@ -115,7 +129,9 @@ export default function QuizMaster() {
           </h1>
 
           <button
-            onClick={startQuiz}
+            onClick={() => {
+              const yo = startQuiz();
+            }}
             className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
           >
             Starta Quiz
