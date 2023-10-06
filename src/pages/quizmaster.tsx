@@ -70,8 +70,10 @@ export default function QuizMaster() {
   const startQuiz = () => {
     setCurrentQuestion(0);
 
-    const url = exampleQuiz.questions.at(0).url;
+    const url = exampleQuiz.questions.at(0)?.url;
     console.log("Fetching with url: " + url);
+    if (url === undefined) return;
+
     // Use the fetch function to make the GET request
     fetch(url, {
       method: "GET",
