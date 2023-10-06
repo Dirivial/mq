@@ -169,6 +169,10 @@ function Tabber(props: TabberInterface) {
           <div className="flex flex-col">
             <input className="input" placeholder="Felaktiga svar" />
           </div>
+
+          <div className="flex flex-col">
+            <input className="input" placeholder="Kategori" />
+          </div>
         </div>
       )}
 
