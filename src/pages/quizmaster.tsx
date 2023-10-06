@@ -1,6 +1,8 @@
 import Head from "next/head";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { env } from "process";
 
 import { api } from "~/utils/api";
 
@@ -9,7 +11,23 @@ type Track = {
   preview: string;
 };
 
-const exampleQuiz = {
+type Quiz = {
+  name: string;
+  questions: Question[];
+};
+
+type Question = {
+  name: string;
+  url: string;
+  answers: Answer[];
+};
+
+type Answer = {
+  name: string;
+  correct: boolean;
+};
+
+const exampleQuiz: Quiz = {
   name: "Example Quiz",
   questions: [
     {
@@ -66,23 +84,22 @@ export default function QuizMaster() {
   const [currentPreview, setCurrentPreview] = useState("");
 
   /*
-  Pritority 1: Connect to deezer API and play a couple of songs.
-
   Priority 2: Create example quiz with 3 questions and play a song for each of them.
 
   Priority 3: Automatically go to the next question after the song has finished playing, and some thinking time.
   */
 
-  const startQuiz = async () => {
+  const startQuiz = () => {
     setCurrentQuestion(0);
 
     const url =
-      "https://cors-anywhere.herokuapp.com/" + exampleQuiz.questions.at(0)?.url;
-    console.log("Fetching with url: " + url);
-    if (url === undefined) return;
+      (env.CORS_PROXY_URL
+        ? env.CORS_PROXY_URL
+        : "https://cors-anywhere.herokuapp.com/") +
+      exampleQuiz.questions.at(0)?.url;
 
     // Use the fetch function to make the GET request
-    await fetch(url, {
+    fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -128,25 +145,76 @@ export default function QuizMaster() {
             QuizMaster
           </h1>
 
-          <button
-            onClick={() => {
-              const yo = startQuiz();
-            }}
-            className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-          >
-            Starta Quiz
-          </button>
+          {currentQuestion < 0 && (
+            <>
+              <button
+                onClick={startQuiz}
+                className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+              >
+                Starta Quiz
+              </button>
 
-          <div className="w-1/2">
-            <div className="divider">eller</div>
-          </div>
+              <div className="w-1/2">
+                <div className="divider">eller</div>
+              </div>
 
-          <button className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20">
-            Logga ut
-          </button>
+              <button className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20">
+                Logga ut
+              </button>
+            </>
+          )}
         </div>
-        <div>{currentQuestion >= 0 && <span>{exampleQuiz.name}</span>}</div>
+        <div>
+          {currentQuestion >= 0 && (
+            <QuestionDisplayer
+              name={
+                exampleQuiz.questions.at(currentQuestion)?.name ?? "Question"
+              }
+              url={exampleQuiz.questions.at(currentQuestion)?.url ?? ""}
+              answers={exampleQuiz.questions.at(currentQuestion)?.answers ?? []}
+            />
+          )}
+        </div>
       </main>
     </>
+  );
+}
+
+interface QuestionDisplayerProps {
+  question: Question;
+  onDone: () => void;
+}
+
+function QuestionDisplayer(props: Question) {
+  const [timePassed, setTimePassed] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimePassed((timePassed) => timePassed + 0.1);
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div>
+      <h1 className="text-center text-2xl font-bold text-white">Question</h1>
+      <h2 className="text-center text-xl text-white">{props.name}</h2>
+
+      <div className="mt-10 grid grid-cols-2 gap-2">
+        {props.answers.map((answer) => (
+          <button className="btn" key={answer.name}>
+            <h3>{answer.name}</h3>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col p-10">
+        <progress
+          className="progress mx-auto w-56"
+          value={timePassed}
+          max="30"
+        ></progress>
+      </div>
+    </div>
   );
 }
