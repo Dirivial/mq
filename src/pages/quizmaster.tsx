@@ -1,10 +1,12 @@
 import Head from "next/head";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-import { env } from "process";
+import { env } from "~/env.mjs";
 
 import { api } from "~/utils/api";
+import Link from "next/link";
 
 type Track = {
   id: number;
@@ -80,57 +82,36 @@ const exampleQuiz: Quiz = {
 export default function QuizMaster() {
   const { data: sessionData } = useSession();
 
-  const [currentQuestion, setCurrentQuestion] = useState(-1);
-  const [currentPreview, setCurrentPreview] = useState("");
-
-  /*
-  Priority 2: Create example quiz with 3 questions and play a song for each of them.
-
-  Priority 3: Automatically go to the next question after the song has finished playing, and some thinking time.
-  */
+  const searchParams = useSearchParams();
+  const [userCode, setUserCode] = useState("");
+  const [epicURL, setEpicURL] = useState("");
 
   const startQuiz = () => {
-    setCurrentQuestion(0);
-
-    const url =
-      (env.CORS_PROXY_URL
-        ? env.CORS_PROXY_URL
-        : "https://cors-anywhere.herokuapp.com/") +
-      exampleQuiz.questions.at(0)?.url;
-
-    // Use the fetch function to make the GET request
-    fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    })
-      .then((response) => {
-        console.log(response);
-
-        // Check if the response status is OK (200)
-        if (!response.ok) {
-          throw new Error("Network response was not ok: " + response.status);
-        }
-
-        // Parse the response body as JSON (assuming it's JSON data)
-        return response.json() as Promise<Track>;
-      })
-      .then((data) => {
-        // Handle the data returned from the server
-        console.log(data);
-        if (data) {
-          const preview = data.preview;
-          const audio = new Audio(preview);
-          void audio.play();
-        }
-      })
-      .catch((error) => {
-        // Handle any errors that occurred during the fetch request
-        console.error("Fetch error:", error);
-      });
+    if (userCode === "") {
+      console.log(searchParams.get("code"));
+      return;
+    }
   };
+
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (code) {
+      setUserCode(code);
+      console.log("Time to do the rest of spotify auth!");
+    } else {
+      const scope = "user-read-private user-read-email";
+      const params = new URLSearchParams();
+      params.append("client_id", env.NEXT_PUBLIC_SPOTIFY_ID);
+      params.append("response_type", "code");
+      params.append("redirect_uri", env.NEXT_PUBLIC_REDIRECT_URL);
+      //params.append("state", state);
+      params.append("scope", scope);
+
+      const url = "https://accounts.spotify.com/authorize?" + params.toString();
+
+      setEpicURL(url);
+    }
+  }, [searchParams]);
 
   return (
     <>
@@ -144,36 +125,27 @@ export default function QuizMaster() {
           <h1 className="text-6xl font-extrabold tracking-tight text-white sm:text-[3rem]">
             QuizMaster
           </h1>
+          <button
+            onClick={startQuiz}
+            className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+          >
+            Starta Quiz
+          </button>
 
-          {currentQuestion < 0 && (
-            <>
-              <button
-                onClick={startQuiz}
-                className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-              >
-                Starta Quiz
-              </button>
+          <Link
+            href={epicURL}
+            className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+          >
+            Anslut till Spotify
+          </Link>
 
-              <div className="w-1/2">
-                <div className="divider">eller</div>
-              </div>
+          <div className="w-1/2">
+            <div className="divider">eller</div>
+          </div>
 
-              <button className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20">
-                Logga ut
-              </button>
-            </>
-          )}
-        </div>
-        <div>
-          {currentQuestion >= 0 && (
-            <QuestionDisplayer
-              name={
-                exampleQuiz.questions.at(currentQuestion)?.name ?? "Question"
-              }
-              url={exampleQuiz.questions.at(currentQuestion)?.url ?? ""}
-              answers={exampleQuiz.questions.at(currentQuestion)?.answers ?? []}
-            />
-          )}
+          <button className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20">
+            Logga ut
+          </button>
         </div>
       </main>
     </>
@@ -217,4 +189,7 @@ function QuestionDisplayer(props: Question) {
       </div>
     </div>
   );
+}
+function generateRandomString(arg0: number) {
+  throw new Error("Function not implemented.");
 }
