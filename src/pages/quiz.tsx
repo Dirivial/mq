@@ -1,8 +1,6 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
-import { api } from "~/utils/api";
-
 type Quiz = {
   name: string;
   questions: Question[];

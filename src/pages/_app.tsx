@@ -1,10 +1,8 @@
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
-import Script from "next/script";
 
 import { api } from "~/utils/api";
-import { env } from "~/env.mjs";
 
 import "~/styles/globals.css";
 

@@ -1,30 +1,20 @@
 import Head from "next/head";
-import { useSession, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 
 import { env } from "~/env.mjs";
 
-import { api } from "~/utils/api";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import ConfigureMusicKit from "~/utils/musicKitConf";
 import Script from "next/script";
 
 export default function QuizMaster() {
-  const { data: sessionData } = useSession();
-
-  const [authURL, setAuthURL] = useState("");
   const router = useRouter();
 
   const startQuiz = () => {
     console.log("Starting quiz...");
     router.push("/quiz");
   };
-
-  useEffect(() => {
-    setAuthURL("");
-  }, []);
 
   return (
     <>
@@ -41,7 +31,7 @@ export default function QuizMaster() {
       </Head>
       <Script
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
-        onLoad={ConfigureMusicKit}
+        //onLoad={ConfigureMusicKit}
       />
       <main className=" flex min-h-screen flex-col items-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
@@ -56,7 +46,7 @@ export default function QuizMaster() {
           </button>
 
           <button
-            onClick={() => ConfigureMusicKit()}
+            onClick={() => void ConfigureMusicKit()}
             className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
           >
             Anslut till Apple Music
@@ -76,9 +66,4 @@ export default function QuizMaster() {
       </main>
     </>
   );
-}
-
-// TODO: Create this and put it in utils
-function generateRandomString(arg0: number) {
-  throw new Error("Function not implemented.");
 }

@@ -1,13 +1,10 @@
 import Head from "next/head";
-import { useSession, signOut } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 import { api } from "~/utils/api";
 import { type Question, type Category } from "@prisma/client";
 
 export default function Dev() {
-  const { data: sessionData } = useSession();
-
   const { isLoading: questionsLoading, data: questionData } =
     api.question.getAllQuestions.useQuery();
 
@@ -130,7 +127,7 @@ interface TabberInterface {
 
 function Tabber(props: TabberInterface) {
   const [mainInput, setMainInput] = useState("");
-  const [wrongAnswers, setWrongAnswers] = useState<string[]>([]);
+  //const [wrongAnswers, setWrongAnswers] = useState<string[]>([]);
 
   const handleClick = () => {
     // Why did I do it like this
