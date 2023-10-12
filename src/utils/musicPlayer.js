@@ -26,6 +26,17 @@ async function AddAlbumToQueue(album) {
   return false;
 }
 
+async function AddSongToQueue(song) {
+  try {
+    const music = MusicKit.getInstance();
+    await music.playLater({ song: song });
+    return true;
+  } catch (error) {
+    console.log(error);
+  }
+  return false;
+}
+
 async function Pause() {
   try {
     const music = MusicKit.getInstance();

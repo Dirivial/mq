@@ -31,11 +31,20 @@ export default function QuizMaster() {
   };*/
 
   const epic = async () => {
+    setIsLoading(true);
     await AddAlbumToQueue("1440910966")
       .catch((e) => console.log(e))
-      .then(() => {
-        console.log("Added to queue!");
-        setHasLoaded(true);
+      .then((ret) => {
+        if (ret) {
+          console.log("Added to queue!");
+          setHasLoaded(true);
+          setIsLoading(false);
+        } else {
+          console.log(
+            "Failed to add to queue! You might need to authorize this browser, go to https://music.apple.com/",
+          );
+          setIsLoading(false);
+        }
       });
   };
 
@@ -111,6 +120,10 @@ export default function QuizMaster() {
             </button>
           )}
 
+          {isLoading && (
+            <span className="loading loading-spinner loading-md"></span>
+          )}
+
           {hasLoaded && (
             <>
               <button
@@ -119,9 +132,6 @@ export default function QuizMaster() {
               >
                 {isPlaying ? "Pausa" : "Spela"}{" "}
               </button>
-              {isLoading && (
-                <span className="loading loading-spinner loading-md"></span>
-              )}
             </>
           )}
 
