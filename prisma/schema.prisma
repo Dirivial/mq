@@ -42,14 +42,24 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String        @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?       @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
-    rank          String    @default("user")
+    role          String        @default("user")
+    spotifyToken  SpotifyToken?
+}
+
+model SpotifyToken {
+    id           Int      @id @default(autoincrement())
+    accessToken  String
+    refreshToken String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId       String   @unique
 }
 
 model VerificationToken {
