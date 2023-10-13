@@ -3,7 +3,7 @@ import { signOut } from "next-auth/react";
 
 import { env } from "~/env.mjs";
 
-//import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import {
   ConfigureMusicKit,
@@ -11,28 +11,47 @@ import {
   Play,
   AddAlbumToQueue,
   Pause,
+  AddSongToQueue,
 } from "~/utils/musicPlayer";
 
 import Script from "next/script";
 import { useState } from "react";
 
 export default function QuizMaster() {
-  //const router = useRouter();
+  const router = useRouter();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(true);
 
-  /*
   const startQuiz = () => {
     console.log("Starting quiz...");
     router.push("/quiz");
-  };*/
+  };
 
   const epic = async () => {
     setIsLoading(true);
     await AddAlbumToQueue("1440910966")
+      .catch((e) => console.log(e))
+      .then((ret) => {
+        if (ret) {
+          console.log("Added to queue!");
+          setHasLoaded(true);
+          setIsLoading(false);
+        } else {
+          console.log(
+            "Failed to add to queue! You might need to authorize this browser, go to https://music.apple.com/",
+          );
+          setIsLoading(false);
+        }
+      });
+  };
+
+  const addSong = async () => {
+    setIsLoading(true);
+    // https://music.apple.com/se/album/news/1440721443?i=1440721450&l=en-GB
+    await AddSongToQueue("1440721450") //AddSongToQueue("1440721443?i=1440721450")
       .catch((e) => console.log(e))
       .then((ret) => {
         if (ret) {
@@ -93,14 +112,12 @@ export default function QuizMaster() {
           <h1 className="text-6xl font-extrabold tracking-tight text-white sm:text-[3rem]">
             QuizMaster
           </h1>
-          {/*
-                    <button
+          <button
             onClick={startQuiz}
             className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
           >
             Starta Quiz
           </button>
-           */}
 
           {!isAuthorized && (
             <button
@@ -112,12 +129,20 @@ export default function QuizMaster() {
           )}
 
           {!hasLoaded && (
-            <button
-              onClick={() => void epic()}
-              className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-            >
-              Köa Dire Straits
-            </button>
+            <>
+              <button
+                onClick={() => void epic()}
+                className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+              >
+                Köa Dire Straits
+              </button>
+              <button
+                onClick={() => void addSong()}
+                className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+              >
+                Köa News
+              </button>
+            </>
           )}
 
           {isLoading && (

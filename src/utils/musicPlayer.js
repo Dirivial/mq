@@ -30,6 +30,18 @@ async function AddSongToQueue(song) {
   try {
     const music = MusicKit.getInstance();
     await music.playLater({ song: song });
+    console.log("Added song to queue");
+    return true;
+  } catch (error) {
+    console.log(error);
+  }
+  return false;
+}
+
+async function AddSongsToQueue(songs) {
+  try {
+    const music = MusicKit.getInstance();
+    await music.playLater({ songs: songs });
     return true;
   } catch (error) {
     console.log(error);
@@ -70,6 +82,8 @@ async function SkipToNext() {
 module.exports = {
   ConfigureMusicKit,
   AddAlbumToQueue,
+  AddSongToQueue,
+  AddSongsToQueue,
   Pause,
   Play,
   SkipToNext,
