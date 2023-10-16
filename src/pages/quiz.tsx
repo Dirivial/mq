@@ -2,12 +2,15 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { SkipToNext, Play, Pause, AddSongsToQueue } from "~/utils/musicPlayer";
+import {
+  SkipToNext,
+  Play,
+  Pause,
+  AddSongsToQueue,
+  ClearQueueFull,
+} from "~/utils/musicPlayer";
 
-type Quiz = {
-  name: string;
-  questions: Question[];
-};
+import { api } from "~/utils/api";
 
 type Question = {
   name: string;
@@ -16,117 +19,37 @@ type Question = {
 };
 
 type Answer = {
-  name: string;
+  text: string;
   correct: boolean;
 };
 
-const exampleQuiz: Quiz = {
-  name: "SuperQuizzet",
-  questions: [
-    {
-      name: "Vad heter låten?",
-      songId: "380907765",
-      answers: [
-        {
-          name: "Take on this",
-          correct: false,
-        },
-        {
-          name: "Take on me",
-          correct: true,
-        },
-        {
-          name: "Take on that",
-          correct: false,
-        },
-        {
-          name: "Take on them",
-          correct: false,
-        },
-      ],
-    },
-    {
-      name: "Vad heter låten?",
-      songId: "800157892",
-      answers: [
-        {
-          name: "Take Me Home Tonight",
-          correct: false,
-        },
-        {
-          name: "This Charming Man",
-          correct: false,
-        },
-        {
-          name: "The Queen Is Dead",
-          correct: false,
-        },
-        {
-          name: "There Is a Light That Never Goes Out",
-          correct: true,
-        },
-      ],
-    },
-    {
-      name: "Vad heter låten?",
-      songId: "1389378880",
-      answers: [
-        {
-          name: "Världen är din",
-          correct: false,
-        },
-        {
-          name: "Drottningen ikväll",
-          correct: false,
-        },
-        {
-          name: "Kung för en dag",
-          correct: true,
-        },
-        {
-          name: "Johnny the Rucker",
-          correct: false,
-        },
-      ],
-    },
-  ],
-};
+const NUM_QUESTIONS = 5;
 
 export default function Quiz() {
   const [timePassed, setTimePassed] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState<Question>(
-    exampleQuiz.questions[0] ?? {
-      name: "No question",
-      songId: "0",
-      answers: [{ name: "No answer", correct: false }],
-    },
-  );
+
+  const { isLoading: questionsLoading, data: questionData } =
+    api.question.getSomeQuestions.useQuery();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [songsLoaded, setSongsLoaded] = useState(false);
   const [showQuestion, setShowQuestion] = useState(false);
 
+  const [questions, setQuestions] = useState<Question[]>([]);
+
   useEffect(() => {
-    const nextQuestion = () => {
-      const nextQuestionIndex = currentIndex + 1;
-
-      if (nextQuestionIndex < exampleQuiz.questions.length) {
-        const q = exampleQuiz.questions[nextQuestionIndex];
-        if (q) {
-          setCurrentQuestion(q);
-        }
-        setCurrentIndex(nextQuestionIndex);
-      } else {
-        setGameOver(true);
-      }
-    };
-
     const interval = setInterval(() => {
       if (timePassed > 30) {
         console.log("Time passed");
         setTimePassed(0);
         setShowQuestion(false);
-        nextQuestion();
+        const nextQuestionIndex = currentIndex + 1;
+
+        if (nextQuestionIndex < NUM_QUESTIONS) {
+          setCurrentIndex(nextQuestionIndex);
+        } else {
+          setGameOver(true);
+        }
       } else {
         setTimePassed((timePassed) => timePassed + 0.1);
       }
@@ -136,12 +59,10 @@ export default function Quiz() {
 
   useEffect(() => {
     if (songsLoaded && !gameOver) {
-      console.log(currentIndex);
       if (currentIndex === 0) {
         Play()
-          .then((v) => {
+          .then(() => {
             setTimePassed(0);
-            console.log("Playing", v);
             setShowQuestion(true);
           })
           .catch(() => {
@@ -158,24 +79,48 @@ export default function Quiz() {
       }
     } else if (gameOver) {
       Pause();
+      void ClearQueueFull();
     }
   }, [currentIndex, songsLoaded, gameOver]);
 
   useEffect(() => {
-    if (!songsLoaded) {
-      const songs: string[] = [];
-      exampleQuiz.questions.forEach((question) => {
-        songs.push(question.songId);
+    if (!songsLoaded && !questionsLoading && questionData) {
+      const questions: Question[] = [];
+
+      questionData.forEach((question) => {
+        console.log(question.answer);
+
+        // Construct question object for this question
+        const answers = question.falseAnswers.map((answer) => ({
+          text: answer,
+          correct: false,
+        }));
+        answers.splice(Math.floor(Math.random() * 4), 0, {
+          text: question.answer,
+          correct: true,
+        });
+        questions.push({
+          name: question.text,
+          songId: question.content,
+          answers: answers,
+        });
       });
 
-      AddSongsToQueue(songs)
+      setQuestions(questions);
+
+      ClearQueueFull()
         .then(() => {
-          console.log("Added songs to queue");
-          setSongsLoaded(true);
+          console.log("Cleared queue");
+          AddSongsToQueue(questions.map((question) => question.songId))
+            .then(() => {
+              console.log("Added songs to queue");
+              setSongsLoaded(true);
+            })
+            .catch(() => console.log("Error adding songs to queue"));
         })
-        .catch(() => console.log("Error adding songs to queue"));
+        .catch(() => console.log("Error clearing queue"));
     }
-  }, [songsLoaded]);
+  }, [songsLoaded, questionsLoading, questionData]);
 
   return (
     <>
@@ -188,14 +133,18 @@ export default function Quiz() {
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
           <Link
             href={"/quizmaster"}
+            onClick={() => {
+              Pause();
+              void ClearQueueFull();
+            }}
             className="text-6xl font-extrabold tracking-tight text-white sm:text-[3rem]"
           >
-            {exampleQuiz.name}
+            Musik Quiz
           </Link>
         </div>
         {gameOver ? (
           <div>
-            <h1 className="text-center text-2xl font-bold text-white">
+            <h1 className="text-center text-4xl font-bold text-white">
               Bra Spelat!
             </h1>
 
@@ -206,13 +155,13 @@ export default function Quiz() {
         ) : showQuestion ? (
           <div>
             <h1 className="text-center text-2xl font-bold text-white">
-              {currentQuestion?.name}
+              {questions.at(currentIndex)?.name ?? "(Inget ifyllt)?"}
             </h1>
 
             <div className="mt-10 grid grid-cols-2 gap-2">
-              {currentQuestion?.answers.map((answer) => (
-                <button className="text btn h-24 text-lg" key={answer.name}>
-                  <h3>{answer.name}</h3>
+              {questions.at(currentIndex)?.answers?.map((answer, index) => (
+                <button className="text btn h-24 text-lg" key={index}>
+                  <h3>{answer.text}</h3>
                 </button>
               ))}
             </div>
@@ -223,6 +172,10 @@ export default function Quiz() {
                 value={timePassed}
                 max="30"
               ></progress>
+
+              <h3 className="text-center text-xl font-bold text-white">
+                {currentIndex + 1}/{NUM_QUESTIONS}
+              </h3>
             </div>
           </div>
         ) : (

@@ -26,6 +26,20 @@ async function AddAlbumToQueue(album) {
   return false;
 }
 
+
+async function ClearQueueFull() {
+  try {
+    const music = MusicKit.getInstance();
+    await music.stop();
+    await music.clearQueue();
+    await music.skipToNextItem();
+    return true;
+  } catch (error) {
+    console.log(error);
+  }
+  return false;
+}
+
 async function AddSongToQueue(song) {
   try {
     const music = MusicKit.getInstance();
@@ -84,6 +98,7 @@ module.exports = {
   AddAlbumToQueue,
   AddSongToQueue,
   AddSongsToQueue,
+  ClearQueueFull,
   Pause,
   Play,
   SkipToNext,
