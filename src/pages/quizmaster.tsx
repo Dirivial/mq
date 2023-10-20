@@ -19,6 +19,12 @@ export default function QuizMaster() {
     router.push("/quiz");
   };
 
+  const openRoom = () => {
+    const roomId = Math.random().toString(36).substring(7);
+    console.log("Opening a new room with id " + roomId + "...");
+    router.push("/room/" + roomId);
+  };
+
   const tryAuthorize = async () => {
     if (isAuthorized) return;
     await ConfigureMusicKit(env.NEXT_PUBLIC_APPLE_DEVELOPER_TOKEN)
@@ -55,6 +61,13 @@ export default function QuizMaster() {
             className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
           >
             Starta Quiz
+          </button>
+
+          <button
+            onClick={openRoom}
+            className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+          >
+            Öppna ett Rum
           </button>
 
           {!isAuthorized && (
