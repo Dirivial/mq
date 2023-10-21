@@ -11,6 +11,10 @@ const UserJoinSchema = z.object({
   name: z.string(),
 });
 
+const GameStartSchema = z.object({
+  questionIds: z.string().array(),
+});
+
 const pusher = new Pusher({
   appId: env.PUSHER_APP_ID,
   key: env.NEXT_PUBLIC_PUSHER_KEY,
@@ -29,16 +33,35 @@ export default function handler(
   if (typeof req.body === "string") {
     try {
       const rawData = JSON.parse(req.body) as unknown;
-      const b = UserJoinSchema.parse(rawData);
-      const name = b.name;
 
-      pusher
-        .trigger("game@" + slug?.toString(), "join", {
-          name: name,
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      if (slug?.at(1) === "join") {
+        console.log("Got join request");
+
+        const body = UserJoinSchema.parse(rawData);
+        const name = body.name;
+
+        pusher
+          .trigger("game@" + slug?.at(0)?.toString(), "join", {
+            name: name,
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else if (slug?.at(1) === "start") {
+        console.log("Got start request");
+        const body = GameStartSchema.parse(rawData);
+        const questionIds = body.questionIds;
+
+        pusher
+          .trigger("game@" + slug?.at(0)?.toString(), "start", {
+            quiestionIds: questionIds,
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else {
+        console.log("No action given");
+      }
     } catch (e) {
       console.log(e);
       res.status(400).json({ message: "Invalid body" });
@@ -49,6 +72,8 @@ export default function handler(
     res.status(400).json({ message: "Invalid body" });
     return;
   }
+
+  console.log(slug);
 
   res.status(200).json({ message: "Request fulfilled." });
 }

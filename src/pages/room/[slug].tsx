@@ -16,7 +16,21 @@ export default function Room() {
     setMembers((prev) => [...prev, name]);
   };
 
-  const initPusher = () => {
+  const sendStart = () => {
+    if (!router.query.slug || router.query.slug.at(0) === "") return;
+    fetch("/api/room/" + router.query.slug.toString() ?? "no-room" + "/start")
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((e) => {
+        console.log(e);
+      })
+      .finally(() => {
+        console.log("fetched");
+      });
+  };
+
+  const openRoom = () => {
     const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: "eu",
     });
@@ -39,37 +53,31 @@ export default function Room() {
     setPusher(p);
   };
 
-  const sendCall = () => {
-    if (!router.query.slug || router.query.slug.at(0) === "") return;
-    fetch("/api/room/" + router.query.slug.toString() ?? "")
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((e) => {
-        console.log(e);
-      })
-      .finally(() => {
-        console.log("fetched");
-      });
-  };
-
   return (
     <div className="">
-      <main className=" flex min-h-screen flex-col items-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className=" flex min-h-screen flex-col items-center bg-base-100">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <h1 className="text-6xl font-extrabold tracking-tight text-white sm:text-[3rem]">
-            MQ
+          <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
+            Q
           </h1>
           Room ID: {router.query.slug}{" "}
-          <button className="btn" onClick={initPusher}>
-            Create Pusher Instance
+          {pusher != null ? (
+            <span>{pusher.connection.state}</span>
+          ) : (
+            <button className="btn btn-primary" onClick={openRoom}>
+              Öppna Rum
+            </button>
+          )}
+          <button className="btn btn-primary" onClick={sendStart}>
+            Starta
           </button>
-          <button className="btn" onClick={sendCall}>
-            Send API call
-          </button>
+          <div className="grid grid-cols-1 grid-rows-2">
+            <span className="loading loading-spinner loading-md m-auto"></span>
+            <span>{members.length} spelare</span>
+          </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">Members</h2>
-            <ul className="text-white">
+            <h2 className="text-center text-2xl font-bold">Spelare</h2>
+            <ul className="text-base-content">
               {members.map((member, index) => (
                 <li key={index}>{member}</li>
               ))}
