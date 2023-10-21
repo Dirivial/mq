@@ -23,7 +23,7 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>,
 ) {
@@ -40,7 +40,7 @@ export default function handler(
         const body = UserJoinSchema.parse(rawData);
         const name = body.name;
 
-        pusher
+        await pusher
           .trigger("game@" + slug?.at(0)?.toString(), "join", {
             name: name,
           })
@@ -52,7 +52,7 @@ export default function handler(
         const body = GameStartSchema.parse(rawData);
         const questionIds = body.questionIds;
 
-        pusher
+        await pusher
           .trigger("game@" + slug?.at(0)?.toString(), "start", {
             quiestionIds: questionIds,
           })
