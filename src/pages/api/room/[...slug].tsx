@@ -27,47 +27,28 @@ export default function handler(
   //console.log(req.body);
 
   if (typeof req.body === "string") {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const rawData = JSON.parse(req.body);
-    const b = UserJoinSchema.parse(rawData);
-    const name = b.name;
-
-    pusher
-      .trigger("game@" + slug?.toString(), "join", {
-        name: name,
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }
-
-  //console.log(req.query.body); // undefined
-
-  // This works but it throws a lot of eslint errors
-  /*
-  try {
-    const body: UserJoin = JSON.parse(req.body);
-    if ("name" in body && typeof body.name === "string") {
-      const name = body.name;
+    try {
+      const rawData = JSON.parse(req.body) as unknown;
+      const b = UserJoinSchema.parse(rawData);
+      const name = b.name;
 
       pusher
-        .trigger("users", "join", {
-          message: typeof name === "string" ? name : "",
+        .trigger("game@" + slug?.toString(), "join", {
+          name: name,
         })
         .catch((e) => {
           console.log(e);
         });
-    } else {
-      console.log("Invalid body");
+    } catch (e) {
+      console.log(e);
       res.status(400).json({ message: "Invalid body" });
       return;
     }
-  } catch (e) {
-    console.log(e);
+  } else {
+    console.log("Invalid body");
     res.status(400).json({ message: "Invalid body" });
     return;
   }
-  */
 
   res.status(200).json({ message: "Request fulfilled." });
 }
