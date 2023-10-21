@@ -6,14 +6,21 @@ import { env } from "~/env.mjs";
 export default function Play() {
   const router = useRouter();
   const [pusher, setPusher] = useState<Pusher | null>(null);
+  const [userName, setUserName] = useState<string>("");
 
   const initPusher = () => {
     const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: "eu",
     });
 
-    const channel = p.subscribe("users");
-    channel.bind("join", function (data: JSON) {
+    const channel = p.subscribe("game");
+    channel.bind("start", function (data: JSON) {
+      alert(JSON.stringify(data));
+    });
+    channel.bind("pause", function (data: JSON) {
+      alert(JSON.stringify(data));
+    });
+    channel.bind("new-question", function (data: JSON) {
       alert(JSON.stringify(data));
     });
 
@@ -22,7 +29,10 @@ export default function Play() {
 
   const sendCall = () => {
     if (!router.query.slug || router.query.slug.at(0) === "") return;
-    fetch("/api/room/" + router.query.slug.toString() ?? "")
+    fetch("/api/room/" + router.query.slug.toString() ?? "", {
+      method: "POST",
+      body: JSON.stringify({ name: userName }),
+    })
       .then((res) => {
         console.log(res);
       })
@@ -48,7 +58,14 @@ export default function Play() {
           <button className="btn" onClick={initPusher}>
             Create Pusher Instance
           </button>
-          <button className="btn" onClick={postJoinMessage}>
+
+          <input
+            className="input"
+            onChange={(e) => setUserName(e.target.value)}
+            value={userName}
+          />
+
+          <button className="btn" onClick={sendCall}>
             Post Join Message
           </button>
         </div>

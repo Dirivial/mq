@@ -3,13 +3,17 @@ import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
 import { env } from "~/env.mjs";
 
+interface UserJoin {
+  name: string;
+}
+
 export default function Room() {
   const router = useRouter();
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [members, setMembers] = useState<string[]>([]);
 
-  const addMemberToList = (memberId: string) => {
-    setMembers((prev) => [...prev, memberId]);
+  const addMemberToList = (name: string) => {
+    setMembers((prev) => [...prev, name]);
   };
 
   const initPusher = () => {
@@ -17,23 +21,21 @@ export default function Room() {
       cluster: "eu",
     });
 
-    //const channel = p.subscribe("join-room:" + router.query.slug?.toString());
-    const channel = p.subscribe("users");
-    channel.bind("join", function (data: JSON) {
-      alert(JSON.stringify(data));
+    const channel = p.subscribe("game@" + router.query.slug?.toString());
+    channel.bind("join", function (data: UserJoin) {
+      try {
+        const name = data.name;
+        if (name === undefined) {
+          throw new Error("Player joined with undefined credentials");
+        } else {
+          console.log("Player joined with name " + name);
+          addMemberToList(name);
+        }
+      } catch (e) {
+        console.log(e);
+      }
     });
 
-    channel.bind("pusher:subscription_succeeded", () => {
-      addMemberToList("papi");
-      console.log("AAAAYoo");
-    });
-    channel.bind("pusher:member_added", (member: { id: string }) => {
-      console.log("Ayo");
-      addMemberToList(member.id);
-    });
-    channel.bind("pusher:member_removed", (member: { id: string }) => {
-      setMembers((prev) => prev.filter((m) => m !== member.id));
-    });
     setPusher(p);
   };
 
