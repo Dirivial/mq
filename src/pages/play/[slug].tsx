@@ -66,7 +66,9 @@ export default function Play() {
               Anslut Till Rummet
             </button>
           ) : (
-            <button onClick={() => void signIn()}>Logga In</button>
+            <button className="btn btn-primary" onClick={() => void signIn()}>
+              Logga In
+            </button>
           )}
 
           {successfullJoin && (
