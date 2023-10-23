@@ -1,3 +1,4 @@
+import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ interface UserJoin {
 
 export default function Room() {
   const router = useRouter();
+  const session = useSession();
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [members, setMembers] = useState<string[]>([]);
 
@@ -61,37 +63,43 @@ export default function Room() {
   return (
     <div className="">
       <main className=" flex min-h-screen flex-col items-center bg-base-100">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
-            Q
-          </h1>
-          Room ID: {router.query.slug}{" "}
-          {pusher != null ? (
-            <div>
-              <span>{pusher.connection.state}</span>
-              <QRCode className="rounded-md bg-white p-2" value={getURL()} />
-            </div>
-          ) : (
-            <button className="btn btn-primary" onClick={openRoom}>
-              Öppna Rum
+        {session.status === "authenticated" ? (
+          <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+            <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
+              Q
+            </h1>
+            Room ID: {router.query.slug}{" "}
+            {pusher != null ? (
+              <div>
+                <span>{pusher.connection.state}</span>
+                <QRCode className="rounded-md bg-white p-2" value={getURL()} />
+              </div>
+            ) : (
+              <button className="btn btn-primary" onClick={openRoom}>
+                Öppna Rum
+              </button>
+            )}
+            <button className="btn btn-primary" onClick={sendStart}>
+              Starta
             </button>
-          )}
-          <button className="btn btn-primary" onClick={sendStart}>
-            Starta
+            <div className="grid grid-cols-1 grid-rows-2">
+              <span className="loading loading-spinner loading-md m-auto"></span>
+              <span>{members.length} spelare</span>
+            </div>
+            <div>
+              <h2 className="text-center text-2xl font-bold">Spelare</h2>
+              <ul className="text-base-content">
+                {members.map((member, index) => (
+                  <li key={index}>{member}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <button className="btn btn-primary" onClick={() => void signIn()}>
+            Logga in
           </button>
-          <div className="grid grid-cols-1 grid-rows-2">
-            <span className="loading loading-spinner loading-md m-auto"></span>
-            <span>{members.length} spelare</span>
-          </div>
-          <div>
-            <h2 className="text-center text-2xl font-bold">Spelare</h2>
-            <ul className="text-base-content">
-              {members.map((member, index) => (
-                <li key={index}>{member}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );
