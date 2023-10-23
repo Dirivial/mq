@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
+import QRCode from "react-qr-code";
 import { env } from "~/env.mjs";
 
 interface UserJoin {
@@ -53,6 +54,15 @@ export default function Room() {
     setPusher(p);
   };
 
+  const getURL = () => {
+    return (
+      "https://" +
+      process.env.VERCEL_URL +
+      "/play/" +
+      router.query.slug?.toString()
+    );
+  };
+
   return (
     <div className="">
       <main className=" flex min-h-screen flex-col items-center bg-base-100">
@@ -62,7 +72,10 @@ export default function Room() {
           </h1>
           Room ID: {router.query.slug}{" "}
           {pusher != null ? (
-            <span>{pusher.connection.state}</span>
+            <div>
+              <span>{pusher.connection.state}</span>
+              <QRCode className="rounded-md bg-white p-2" value={getURL()} />
+            </div>
           ) : (
             <button className="btn btn-primary" onClick={openRoom}>
               Öppna Rum
