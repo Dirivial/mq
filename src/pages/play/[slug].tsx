@@ -1,3 +1,4 @@
+import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
@@ -9,9 +10,9 @@ interface GameStart {
 
 export default function Play() {
   const router = useRouter();
+  const session = useSession();
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [questionIds, setQuestionIds] = useState<string[]>([]);
-  const [userName, setUserName] = useState<string>("");
   const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
 
   const initPusher = () => {
@@ -37,7 +38,7 @@ export default function Play() {
 
     fetch("/api/room/" + (router.query.slug.toString() ?? "") + "/join", {
       method: "POST",
-      body: JSON.stringify({ name: userName }),
+      body: JSON.stringify({ name: session.data?.user?.name }),
     })
       .then((res) => {
         if (res.status === 200) {
@@ -60,21 +61,15 @@ export default function Play() {
           <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[3rem]">
             {router.query.slug}
           </h1>
-
-          {!successfullJoin ? (
-            <div className="flex flex-col gap-4">
-              <input
-                className="input input-primary input-md"
-                placeholder="Ange ditt namn"
-                onChange={(e) => setUserName(e.target.value)}
-                value={userName}
-              />
-
-              <button className="btn btn-primary" onClick={sendCall}>
-                Anslut Till Rummet
-              </button>
-            </div>
+          {session.status === "authenticated" ? (
+            <button className="btn btn-primary" onClick={sendCall}>
+              Anslut Till Rummet
+            </button>
           ) : (
+            <button onClick={() => void signIn()}>Logga In</button>
+          )}
+
+          {successfullJoin && (
             <div>
               {questionIds.length > 0 ? (
                 <span>Questions loaded!</span>
