@@ -51,41 +51,37 @@ export default function QuizMaster() {
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
         onLoad={() => void tryAuthorize()}
       />
-      <main className=" flex min-h-screen flex-col items-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <h1 className="text-6xl font-extrabold tracking-tight text-white sm:text-[3rem]">
+      <main className="flex min-h-screen items-center justify-center">
+        <div className="container flex flex-col items-center gap-12 px-4 py-16 text-center">
+          <h1 className="text-[clamp(5rem,10vw,12rem)] md:text-[clamp(8rem,10vw,12rem)] font-extrabold ">
             QuizMaster
           </h1>
           <button
             onClick={startQuiz}
-            className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+            className="btn btn-wide btn-primary"
           >
             Starta Quiz
           </button>
-
           <button
             onClick={openRoom}
-            className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+            className="btn btn-wide btn-primary"
           >
             Öppna ett Rum
           </button>
-
           {!isAuthorized && (
             <button
               onClick={() => void tryAuthorize()}
-              className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+              className="btn btn-wide btn-primary"
             >
               Anslut till Apple Music
             </button>
           )}
-
-          <div className="w-1/2">
+          <div className="w-1/2 my-4">
             <div className="divider">eller</div>
           </div>
-
           <button
             onClick={void signOut}
-            className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+            className="btn btn-wide btn-outline btn-primary"
           >
             Logga ut
           </button>
@@ -93,4 +89,5 @@ export default function QuizMaster() {
       </main>
     </>
   );
-}
+  
+  }

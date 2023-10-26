@@ -129,63 +129,54 @@ export default function Quiz() {
         <meta name="description" content="Nu är det dags för QUIZ!." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className=" flex min-h-screen flex-col items-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+      <main className="flex min-h-screen items-center justify-center">
+        <div className="container flex flex-col items-center gap-12 px-4 py-16 text-center">
           <Link
             href={"/quizmaster"}
             onClick={() => {
               Pause();
               void ClearQueueFull();
             }}
-            className="text-6xl font-extrabold tracking-tight text-white sm:text-[3rem]"
+            className="text-[clamp(4rem,17vw,6rem)] md:text-[clamp(4rem,8vw,6rem)] font-extrabold tracking-tight"
           >
             Musik Quiz
           </Link>
+          {gameOver ? (
+            <div>
+              <h1 className="text-4xl font-bold ">Bra Spelat!</h1>
+              <h3 className="text-xl font-bold ">(Statistik...)</h3>
+            </div>
+          ) : showQuestion ? (
+            <div>
+              <h1 className="text-2xl font-bold ">
+                {questions.at(currentIndex)?.name ?? "(Inget ifyllt)?"}
+              </h1>
+              <div className="mt-10 grid grid-cols-2 gap-2">
+                {questions.at(currentIndex)?.answers?.map((answer, index) => (
+                  <button className="btn btn-outline btn-accent h-24 text-lg" key={index}>
+                    <h3>{answer.text}</h3>
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-col p-10">
+                <progress
+                  className="progress mx-auto w-96"
+                  value={timePassed}
+                  max="30"
+                ></progress>
+                <h3 className="text-xl font-bold ">
+                  {currentIndex + 1}/{NUM_QUESTIONS}
+                </h3>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <h1 className="text-2xl font-bold text-white">Gör er redo!</h1>
+            </div>
+          )}
         </div>
-        {gameOver ? (
-          <div>
-            <h1 className="text-center text-4xl font-bold text-white">
-              Bra Spelat!
-            </h1>
-
-            <h3 className="text-center text-xl font-bold text-white">
-              (Statistik...)
-            </h3>
-          </div>
-        ) : showQuestion ? (
-          <div>
-            <h1 className="text-center text-2xl font-bold text-white">
-              {questions.at(currentIndex)?.name ?? "(Inget ifyllt)?"}
-            </h1>
-
-            <div className="mt-10 grid grid-cols-2 gap-2">
-              {questions.at(currentIndex)?.answers?.map((answer, index) => (
-                <button className="text btn h-24 text-lg" key={index}>
-                  <h3>{answer.text}</h3>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-col p-10">
-              <progress
-                className="progress mx-auto w-96"
-                value={timePassed}
-                max="30"
-              ></progress>
-
-              <h3 className="text-center text-xl font-bold text-white">
-                {currentIndex + 1}/{NUM_QUESTIONS}
-              </h3>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h1 className="text-center text-2xl font-bold text-white">
-              Gör er redo!
-            </h1>
-          </div>
-        )}
       </main>
     </>
   );
+  
 }
