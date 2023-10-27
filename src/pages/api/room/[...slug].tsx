@@ -12,7 +12,7 @@ const UserJoinSchema = z.object({
 });
 
 const GameStartSchema = z.object({
-  questionIds: z.string().array(),
+  questionIds: z.number().array(),
 });
 
 const pusher = new Pusher({
