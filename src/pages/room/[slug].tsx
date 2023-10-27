@@ -1,14 +1,24 @@
+import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
+import QRCode from "react-qr-code";
 import { env } from "~/env.mjs";
 
 interface UserJoin {
   name: string;
 }
 
+const dummyIds = [
+  "60f9b3b3d9b3a1b4e4f1e3a1",
+  "60f9b3b3d9b3a1b4e4f1e3a2",
+  "60f9b3b3d9b3a1b4e4f1e3a3",
+  "60f9b3b3d9b3a1b4e4f1e3a4",
+];
+
 export default function Room() {
   const router = useRouter();
+  const session = useSession();
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [members, setMembers] = useState<string[]>([]);
 
@@ -18,7 +28,13 @@ export default function Room() {
 
   const sendStart = () => {
     if (!router.query.slug || router.query.slug.at(0) === "") return;
-    fetch("/api/room/" + router.query.slug.toString() ?? "no-room" + "/start")
+    fetch(
+      "/api/room/" + (router.query.slug.toString() ?? "no-room") + "/start",
+      {
+        method: "POST",
+        body: JSON.stringify({ questionIds: dummyIds }),
+      },
+    )
       .then((res) => {
         console.log(res);
       })
@@ -53,6 +69,10 @@ export default function Room() {
     setPusher(p);
   };
 
+  const getURL = () => {
+    return env.NEXT_PUBLIC_URL + "/play/" + router.query.slug?.toString();
+  };
+
   return (
     <div className="flex flex-grow flex-col items-center h-[100vh]">
 
@@ -66,6 +86,7 @@ export default function Room() {
           Room ID: {router.query.slug}
           {pusher != null ? (
             <span>{pusher.connection.state}</span>
+            <QRCode className="rounded-md bg-white p-2" value={getURL()} />
           ) : (
             <button className="btn btn-wide btn-primary" onClick={openRoom}>
               Öppna Rum
@@ -90,7 +111,6 @@ export default function Room() {
             </ul>
           </div>
         </div>
-
       </main>
     </div>
   );

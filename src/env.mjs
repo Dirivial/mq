@@ -44,6 +44,7 @@ export const env = createEnv({
     // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
     NEXT_PUBLIC_APPLE_DEVELOPER_TOKEN: z.string().min(1),
     NEXT_PUBLIC_PUSHER_KEY: z.string().min(1),
+    NEXT_PUBLIC_URL: z.string().min(1),
   },
 
   /**
@@ -61,6 +62,7 @@ export const env = createEnv({
     PUSHER_APP_ID: process.env.PUSHER_APP_ID,
     NEXT_PUBLIC_PUSHER_KEY: process.env.NEXT_PUBLIC_PUSHER_KEY,
     NEXT_PUBLIC_APPLE_DEVELOPER_TOKEN: process.env.NEXT_PUBLIC_APPLE_DEVELOPER_TOKEN,
+    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

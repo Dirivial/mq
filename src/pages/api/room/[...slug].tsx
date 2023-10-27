@@ -35,8 +35,6 @@ export default async function handler(
       const rawData = JSON.parse(req.body) as unknown;
 
       if (slug?.at(1) === "join") {
-        console.log("Got join request");
-
         const body = UserJoinSchema.parse(rawData);
         const name = body.name;
 
@@ -48,13 +46,12 @@ export default async function handler(
             console.log(e);
           });
       } else if (slug?.at(1) === "start") {
-        console.log("Got start request");
         const body = GameStartSchema.parse(rawData);
         const questionIds = body.questionIds;
 
         await pusher
           .trigger("game@" + slug?.at(0)?.toString(), "start", {
-            quiestionIds: questionIds,
+            questionIds: questionIds,
           })
           .catch((e) => {
             console.log(e);
