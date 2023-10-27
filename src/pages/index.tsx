@@ -12,14 +12,17 @@ export default function Home() {
         <meta name="description" content="En webapp för musikquiz." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="hero min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="hero-content text-center">
-          <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-            <h1 className="text-6xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-              MQ
-            </h1>
-            <AuthShowcase />
-          </div>
+      <main className="hero min-h-screen flex items-center justify-center ">
+        <div className="container flex flex-col items-center gap-20 px-4 py-16 text-center">
+          <div className="flex flex-col items-center">
+          <h1 className="text-[clamp(4rem,17vw,6rem)] md:text-[clamp(4rem,8vw,6rem)] font-extrabold tracking-tight">
+            MQ
+          </h1>
+          <h2 className="text-body">
+           Quizet för dig som gillar musik (no shit) 
+          </h2>
+        </div>
+          <AuthShowcase />
         </div>
       </main>
     </>
@@ -35,23 +38,25 @@ function AuthShowcase() {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center gap-10">
-      <p className="grid grid-rows-2 gap-y-10 text-center text-2xl text-white">
-        {sessionData && (
-          <span className="text-3xl">Tjena {sessionData.user?.name}!</span>
-        )}
+    <div className="flex flex-col items-center justify-center gap-10 w-full">
+      {sessionData && (
+        <div className="absolute top-0 left-0 right-0 bg-primary p-4 text-center text-base-100">
+          Inloggad som {sessionData.user?.email}
+        </div>
+      )}
+      <div className="flex flex-col items-center justify-center gap-10">
         {secretMessage && (
-          <Link className="btn btn-primary" href="/quizmaster">
+          <Link className="btn btn-primary btn-wide" href="/quizmaster">
             Gå vidare
           </Link>
         )}
-      </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Logga ut" : "Logga in"}
-      </button>
+        <button
+          className="btn btn-outline btn-primary btn-wide"
+          onClick={sessionData ? () => void signOut() : () => void signIn()}
+        >
+          {sessionData ? "Logga ut" : "Logga in"}
+        </button>
+      </div>
     </div>
   );
 }
