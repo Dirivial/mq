@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { env } from "~/env.mjs";
 
 interface GameStart {
-  questionIds: string[];
+  questionIds: number[];
 }
 
 export default function Play() {
   const router = useRouter();
   const session = useSession();
   const [pusher, setPusher] = useState<Pusher | null>(null);
-  const [questionIds, setQuestionIds] = useState<string[]>([]);
+  const [questionIds, setQuestionIds] = useState<number[]>([]);
   const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
 
   const initPusher = () => {
