@@ -9,6 +9,13 @@ interface UserJoin {
   name: string;
 }
 
+const dummyIds = [
+  "60f9b3b3d9b3a1b4e4f1e3a1",
+  "60f9b3b3d9b3a1b4e4f1e3a2",
+  "60f9b3b3d9b3a1b4e4f1e3a3",
+  "60f9b3b3d9b3a1b4e4f1e3a4",
+];
+
 export default function Room() {
   const router = useRouter();
   const session = useSession();
