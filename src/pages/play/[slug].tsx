@@ -23,6 +23,7 @@ export default function Play() {
     const channel = p.subscribe("game@" + router.query.slug?.toString());
     channel.bind("start", function (data: GameStart) {
       setQuestionIds(data.questionIds);
+      console.log("Game started with questions ", data.questionIds);
     });
     channel.bind("new-question", function (data: JSON) {
       alert(JSON.stringify(data));
@@ -73,7 +74,7 @@ export default function Play() {
 
           {successfullJoin && (
             <div>
-              {questionIds.length > 0 ? (
+              {questionIds != undefined && questionIds.length > 0 ? (
                 <span>Questions loaded!</span>
               ) : (
                 <span>Waiting for game to start</span>

@@ -28,7 +28,13 @@ export default function Room() {
 
   const sendStart = () => {
     if (!router.query.slug || router.query.slug.at(0) === "") return;
-    fetch("/api/room/" + router.query.slug.toString() ?? "no-room" + "/start")
+    fetch(
+      "/api/room/" + (router.query.slug.toString() ?? "no-room") + "/start",
+      {
+        method: "POST",
+        body: JSON.stringify({ questionIds: dummyIds }),
+      },
+    )
       .then((res) => {
         console.log(res);
       })
