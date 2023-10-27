@@ -54,24 +54,30 @@ export default function Room() {
   };
 
   return (
-    <div className="">
-      <main className=" flex min-h-screen flex-col items-center bg-base-100">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
-            Q
-          </h1>
-          Room ID: {router.query.slug}{" "}
+    <div className="flex flex-grow flex-col items-center h-[100vh]">
+
+      <main className="flex flex-col justify-between items-center w-4/5 h-[50vh] mx-auto my-auto">
+
+        <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
+          Quizroom
+        </h1>
+
+        <div className="text-center mb-4 flex flex-col gap-5">
+          Room ID: {router.query.slug}
           {pusher != null ? (
             <span>{pusher.connection.state}</span>
           ) : (
-            <button className="btn btn-primary" onClick={openRoom}>
+            <button className="btn btn-wide btn-primary" onClick={openRoom}>
               Öppna Rum
             </button>
           )}
-          <button className="btn btn-primary" onClick={sendStart}>
+          <button className="btn btn-wide btn-primary mb-4" onClick={sendStart}>
             Starta
           </button>
-          <div className="grid grid-cols-1 grid-rows-2">
+        </div>
+        
+        <div className="">
+          <div className="grid grid-cols-1 grid-rows-2 mb-4">
             <span className="loading loading-spinner loading-md m-auto"></span>
             <span>{members.length} spelare</span>
           </div>
@@ -84,6 +90,7 @@ export default function Room() {
             </ul>
           </div>
         </div>
+
       </main>
     </div>
   );
