@@ -14,6 +14,7 @@ export default function Play() {
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [questionIds, setQuestionIds] = useState<number[]>([]);
   const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(-1);
 
   const initPusher = () => {
     const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
@@ -24,9 +25,13 @@ export default function Play() {
     channel.bind("start", function (data: GameStart) {
       setQuestionIds(data.questionIds);
       console.log("Game started with questions ", data.questionIds);
+      // TODO: Fetch questions from db
+      // We want to fetch the questions to lessen the load on the socket server
+      // (Also, we should cache the questions so that the server doesn't have to do a db call every time)
     });
-    channel.bind("new-question", function (data: JSON) {
-      alert(JSON.stringify(data));
+    channel.bind("new-question", function (data: number) {
+      console.log("New question ", data);
+      setCurrentIndex(data);
     });
 
     setPusher(p);
@@ -43,15 +48,11 @@ export default function Play() {
     })
       .then((res) => {
         if (res.status === 200) {
-          console.log("success");
           setSuccessfullJoin(true);
         }
       })
       .catch((e) => {
         console.log(e);
-      })
-      .finally(() => {
-        console.log("fetched");
       });
   };
 
@@ -62,22 +63,36 @@ export default function Play() {
           <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[3rem]">
             {router.query.slug}
           </h1>
-          {session.status === "authenticated" ? (
-            <button className="btn btn-primary" onClick={sendCall}>
-              Anslut Till Rummet
-            </button>
-          ) : (
-            <button className="btn btn-primary" onClick={() => void signIn()}>
-              Logga In
-            </button>
-          )}
 
-          {successfullJoin && (
+          {successfullJoin ? (
             <div>
               {questionIds != undefined && questionIds.length > 0 ? (
-                <span>Questions loaded!</span>
+                <div>
+                  {currentIndex === -1 ? (
+                    <span>Nu kör vi!</span>
+                  ) : (
+                    <span>
+                      Fråga {currentIndex + 1} av {questionIds.length}
+                    </span>
+                  )}
+                </div>
               ) : (
-                <span>Waiting for game to start</span>
+                <span>Väntar på att spelet ska starta...</span>
+              )}
+            </div>
+          ) : (
+            <div>
+              {session.status === "authenticated" ? (
+                <button className="btn btn-primary btn-wide" onClick={sendCall}>
+                  Anslut Till Rummet
+                </button>
+              ) : (
+                <button
+                  className="btn btn-primary btn-wide"
+                  onClick={() => void signIn()}
+                >
+                  Logga In
+                </button>
               )}
             </div>
           )}

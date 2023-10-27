@@ -40,6 +40,10 @@ export default function Room() {
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [members, setMembers] = useState<string[]>([]);
   const [questions, setQuestions] = useState<SimpleQuestion[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [phase, setPhase] = useState("waiting");
+  const [counter, setCounter] = useState<number>(5);
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>();
 
   const { data: questionData, isSuccess: gotQuestions } =
     api.question.getSomeQuestions.useQuery();
@@ -65,6 +69,7 @@ export default function Room() {
       })
       .finally(() => {
         console.log("fetched");
+        setPhase("starting");
       });
   };
 
@@ -91,15 +96,43 @@ export default function Room() {
     setPusher(p);
   };
 
+  const NextQuestion = () => {
+    if (currentIndex + 1 < questions.length) {
+      if (currentIndex === -1) {
+        Play()
+          .then(() => {
+            setCurrentIndex((prev) => prev + 1);
+            setCounter(0);
+            setPhase("playing");
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else {
+        Pause();
+        SkipToNext()
+          .then(() => {
+            setCurrentIndex((prev) => prev + 1);
+            setCounter(0);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    } else {
+      setPhase("results");
+    }
+  };
+
   const getURL = () => {
     return env.NEXT_PUBLIC_URL + "/play/" + router.query.slug?.toString();
   };
 
   useEffect(() => {
-    if (questionData) {
+    if (gotQuestions && questions.length === 0) {
       setQuestions(PrepareForQuiz(questionData));
     }
-  }, [questionData, gotQuestions]);
+  }, [questionData, gotQuestions, questions]);
 
   const tryAuthorize = async () => {
     if (isAuthorized) return;
@@ -109,6 +142,54 @@ export default function Room() {
         setIsAuthorized(authorized ?? false);
       });
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (phase === "playing" && counter > 30) {
+        console.log("Time passed");
+        setCounter(0);
+        const nextQuestionIndex = currentIndex + 1;
+
+        if (nextQuestionIndex < 5) {
+          setCurrentIndex(nextQuestionIndex);
+        } else {
+          setPhase("results");
+        }
+      } else if (phase === "starting" && counter > 5) {
+        setPhase("playing");
+        setCounter(0);
+      } else {
+        setCounter((counter) => counter + 0.1);
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [currentIndex, counter, phase]);
+
+  useEffect(() => {
+    if (phase === "playing") {
+      if (currentIndex === 0) {
+        Play()
+          .then(() => {
+            setCounter(0);
+            //setShowQuestion(true);
+          })
+          .catch(() => {
+            console.log("Error playing");
+          });
+      } else {
+        SkipToNext()
+          .then(() => {
+            console.log("Skipped to next song");
+            setCounter(0);
+            //setShowQuestion(true);
+          })
+          .catch(() => console.log("Error skipping to next song"));
+      }
+    } else if (phase === "results") {
+      Pause();
+      void ClearQueueFull();
+    }
+  }, [currentIndex, phase]);
 
   return (
     <>
@@ -132,44 +213,124 @@ export default function Room() {
           <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
             Quizroom
           </h1>
+          <h3>{phase}</h3>
 
-          <div className="mb-4 flex flex-col gap-5 text-center">
-            Room ID: {router.query.slug}
-            {pusher != null ? (
-              <div>
-                <span>{pusher.connection.state}</span>
-                <QRCode className="rounded-md bg-white p-2" value={getURL()} />
+          {phase === "playing" && (
+            <>
+              <ShowCurrentQuestion
+                question={
+                  questions.at(currentIndex) ?? {
+                    name: "",
+                    songId: "",
+                    answers: [],
+                  }
+                }
+                time={counter}
+                currentIndex={currentIndex}
+                done={NextQuestion}
+              />
+            </>
+          )}
+
+          {phase === "starting" && (
+            <>
+              <ShowQuizStarting time={counter} />
+            </>
+          )}
+
+          {phase === "waiting" && (
+            <>
+              <div className="mb-4 flex flex-col gap-5 text-center">
+                Room ID: {router.query.slug}
+                {pusher != null ? (
+                  <div>
+                    <span>{pusher.connection.state}</span>
+                    <QRCode
+                      className="rounded-md bg-white p-2"
+                      value={getURL()}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-wide"
+                    onClick={openRoom}
+                  >
+                    Öppna Rum
+                  </button>
+                )}
+                <button
+                  className="btn btn-primary btn-wide mb-4"
+                  onClick={sendStart}
+                >
+                  Starta
+                </button>
               </div>
-            ) : (
-              <button className="btn btn-primary btn-wide" onClick={openRoom}>
-                Öppna Rum
-              </button>
-            )}
-            <button
-              className="btn btn-primary btn-wide mb-4"
-              onClick={sendStart}
-            >
-              Starta
-            </button>
-          </div>
 
-          <div className="">
-            <div className="mb-4 grid grid-cols-1 grid-rows-2">
-              <span className="loading loading-spinner loading-md m-auto"></span>
-              <span>{members.length} spelare</span>
-            </div>
-            <div>
-              <h2 className="text-center text-2xl font-bold">Spelare</h2>
-              <ul className="text-base-content">
-                {members.map((member, index) => (
-                  <li key={index}>{member}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+              <div className="">
+                <div className="mb-4 grid grid-cols-1 grid-rows-2">
+                  <span className="loading loading-spinner loading-md m-auto"></span>
+                  <span>{members.length} spelare</span>
+                </div>
+                <div>
+                  <h2 className="text-center text-2xl font-bold">Spelare</h2>
+                  <ul className="text-base-content">
+                    {members.map((member, index) => (
+                      <li key={index}>{member}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
         </main>
       </div>
     </>
+  );
+}
+
+interface CurrentQuestionInterface {
+  question: SimpleQuestion;
+  time: number;
+  currentIndex: number;
+  done: () => void;
+}
+
+function ShowCurrentQuestion(props: CurrentQuestionInterface) {
+  return (
+    <div>
+      <h1 className="text-2xl font-bold ">{props.question.name}</h1>
+      <div className="mt-10 grid grid-cols-2 gap-2">
+        {props.question.answers.map((answer, index) => (
+          <button
+            className="btn btn-accent btn-outline h-24 text-lg"
+            key={index}
+          >
+            <h3>{answer.text}</h3>
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-col p-10">
+        <progress
+          className="progress mx-auto w-96"
+          value={props.time}
+          max="30"
+        ></progress>
+        <h3 className="text-xl font-bold ">{props.currentIndex + 1}/5</h3>
+      </div>
+    </div>
+  );
+}
+
+interface QuizStartingInterface {
+  time: number;
+}
+
+function ShowQuizStarting(props: QuizStartingInterface) {
+  return (
+    <div className="flex flex-col items-center">
+      <h1 className="text-4xl font-bold">Quizet börjar om</h1>
+      <h2 className="text-2xl font-bold">{props.time}</h2>
+    </div>
   );
 }
 
