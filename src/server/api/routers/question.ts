@@ -5,7 +5,8 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 export const questionRouter = createTRPCRouter({
   getSomeQuestions: protectedProcedure.query(async ({ ctx }) => {
     const productsCount = await ctx.db.question.count();
-    const skip = Math.floor(Math.random() * productsCount);
+    let skip = Math.floor(Math.random() * productsCount);
+    if (skip > productsCount - 5) skip = productsCount - 5;
     return await ctx.db.question.findMany({
       take: 5,
       skip: skip,
@@ -14,6 +15,18 @@ export const questionRouter = createTRPCRouter({
       },
     });
   }),
+
+  getGroupOfQuestions: protectedProcedure
+    .input(z.object({ ids: z.number().array() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.question.findMany({
+        where: {
+          id: {
+            in: input.ids,
+          },
+        },
+      });
+    }),
 
   getAllQuestions: protectedProcedure.query(({ ctx }) => {
     return ctx.db.question.findMany();
