@@ -15,6 +15,10 @@ const GameStartSchema = z.object({
   questionIds: z.number().array(),
 });
 
+const NewQuestionSchema = z.object({
+  newQuestionIndex: z.number(),
+});
+
 const pusher = new Pusher({
   appId: env.PUSHER_APP_ID,
   key: env.NEXT_PUBLIC_PUSHER_KEY,
@@ -52,6 +56,16 @@ export default async function handler(
         await pusher
           .trigger("game@" + slug?.at(0)?.toString(), "start", {
             questionIds: questionIds,
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else if (slug?.at(1) === "new-question") {
+        const body = NewQuestionSchema.parse(rawData);
+        const newQuestionIndex = body.newQuestionIndex;
+        await pusher
+          .trigger("game@" + slug?.at(0)?.toString(), "new-question", {
+            newQuestionIndex: newQuestionIndex,
           })
           .catch((e) => {
             console.log(e);

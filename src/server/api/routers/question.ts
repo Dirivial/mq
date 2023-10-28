@@ -16,6 +16,18 @@ export const questionRouter = createTRPCRouter({
     });
   }),
 
+  getGroupOfQuestions: protectedProcedure
+    .input(z.object({ ids: z.number().array() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.question.findMany({
+        where: {
+          id: {
+            in: input.ids,
+          },
+        },
+      });
+    }),
+
   getAllQuestions: protectedProcedure.query(({ ctx }) => {
     return ctx.db.question.findMany();
   }),

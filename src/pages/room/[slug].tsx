@@ -19,6 +19,7 @@ import Head from "next/head";
 import Script from "next/script";
 
 type SimpleQuestion = {
+  id: number;
   name: string;
   songId: string;
   answers: Answer[];
@@ -43,7 +44,7 @@ export default function Room() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState("waiting");
   const [counter, setCounter] = useState<number>(5);
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>();
+  const [showQuestion, setShowQuestion] = useState(false);
 
   const { data: questionData, isSuccess: gotQuestions } =
     api.question.getSomeQuestions.useQuery();
@@ -54,11 +55,15 @@ export default function Room() {
 
   const sendStart = () => {
     if (!router.query.slug || router.query.slug.at(0) === "") return;
+    console.log(
+      "Sending start",
+      questions.map((q) => q.id),
+    );
     fetch(
       "/api/room/" + (router.query.slug.toString() ?? "no-room") + "/start",
       {
         method: "POST",
-        body: JSON.stringify({ questionIds: questionData?.map((q) => q.id) }),
+        body: JSON.stringify({ questionIds: questions.map((q) => q.id) }),
       },
     )
       .then((res) => {
@@ -69,6 +74,7 @@ export default function Room() {
       })
       .finally(() => {
         console.log("fetched");
+        setCounter(0);
         setPhase("starting");
       });
   };
@@ -96,34 +102,6 @@ export default function Room() {
     setPusher(p);
   };
 
-  const NextQuestion = () => {
-    if (currentIndex + 1 < questions.length) {
-      if (currentIndex === -1) {
-        Play()
-          .then(() => {
-            setCurrentIndex((prev) => prev + 1);
-            setCounter(0);
-            setPhase("playing");
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      } else {
-        Pause();
-        SkipToNext()
-          .then(() => {
-            setCurrentIndex((prev) => prev + 1);
-            setCounter(0);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      }
-    } else {
-      setPhase("results");
-    }
-  };
-
   const getURL = () => {
     return env.NEXT_PUBLIC_URL + "/play/" + router.query.slug?.toString();
   };
@@ -134,6 +112,7 @@ export default function Room() {
     }
   }, [questionData, gotQuestions, questions]);
 
+  // Music kit authorization
   const tryAuthorize = async () => {
     if (isAuthorized) return;
     await ConfigureMusicKit(env.NEXT_PUBLIC_APPLE_DEVELOPER_TOKEN)
@@ -144,52 +123,64 @@ export default function Room() {
   };
 
   useEffect(() => {
+    const sendNext = (newIndex: number) => {
+      if (!router.query.slug || router.query.slug.at(0) === "") return;
+      fetch(
+        "/api/room/" +
+          (router.query.slug.toString() ?? "no-room") +
+          "/new-question",
+        {
+          method: "POST",
+          body: JSON.stringify({ newQuestionIndex: newIndex }),
+        },
+      )
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    };
+
     const interval = setInterval(() => {
       if (phase === "playing" && counter > 30) {
-        console.log("Time passed");
+        // Go to next question, or end the game
         setCounter(0);
         const nextQuestionIndex = currentIndex + 1;
 
         if (nextQuestionIndex < 5) {
           setCurrentIndex(nextQuestionIndex);
+          sendNext(nextQuestionIndex);
+          setShowQuestion(false);
+          SkipToNext()
+            .then(() => {
+              console.log("Skipped to next song");
+              setCounter(0);
+              setShowQuestion(true);
+            })
+            .catch(() => console.log("Error skipping to next song"));
         } else {
           setPhase("results");
+          Pause();
+          void ClearQueueFull();
         }
       } else if (phase === "starting" && counter > 5) {
         setPhase("playing");
-        setCounter(0);
-      } else {
-        setCounter((counter) => counter + 0.1);
-      }
-    }, 100);
-    return () => clearInterval(interval);
-  }, [currentIndex, counter, phase]);
-
-  useEffect(() => {
-    if (phase === "playing") {
-      if (currentIndex === 0) {
         Play()
           .then(() => {
             setCounter(0);
-            //setShowQuestion(true);
+            sendNext(0);
+            setShowQuestion(true);
           })
           .catch(() => {
             console.log("Error playing");
           });
       } else {
-        SkipToNext()
-          .then(() => {
-            console.log("Skipped to next song");
-            setCounter(0);
-            //setShowQuestion(true);
-          })
-          .catch(() => console.log("Error skipping to next song"));
+        setCounter((counter) => counter + 0.1);
       }
-    } else if (phase === "results") {
-      Pause();
-      void ClearQueueFull();
-    }
-  }, [currentIndex, phase]);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [currentIndex, counter, phase, router.query.slug]);
 
   return (
     <>
@@ -210,10 +201,20 @@ export default function Room() {
       />
       <div className="flex h-[100vh] flex-grow flex-col items-center">
         <main className="mx-auto my-auto flex h-[50vh] w-4/5 flex-col items-center justify-between">
-          <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
+          <h1 className="text-2xl font-extrabold tracking-tight text-base-content sm:text-[3rem]">
             Quizroom
           </h1>
-          <h3>{phase}</h3>
+
+          {phase === "results" && (
+            <div className="my-12 flex h-full flex-col justify-start">
+              <h1 className="mb-12 text-center text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
+                Bra Spelat!
+              </h1>
+              <h2 className="text-center text-xl font-extrabold tracking-tight text-base-content sm:text-[2rem]">
+                Här kommer resultaten
+              </h2>
+            </div>
+          )}
 
           {phase === "playing" && (
             <>
@@ -227,7 +228,7 @@ export default function Room() {
                 }
                 time={counter}
                 currentIndex={currentIndex}
-                done={NextQuestion}
+                show={showQuestion}
               />
             </>
           )}
@@ -292,31 +293,39 @@ interface CurrentQuestionInterface {
   question: SimpleQuestion;
   time: number;
   currentIndex: number;
-  done: () => void;
+  show: boolean;
 }
 
 function ShowCurrentQuestion(props: CurrentQuestionInterface) {
   return (
     <div>
-      <h1 className="text-2xl font-bold ">{props.question.name}</h1>
-      <div className="mt-10 grid grid-cols-2 gap-2">
-        {props.question.answers.map((answer, index) => (
-          <button
-            className="btn btn-accent btn-outline h-24 text-lg"
-            key={index}
-          >
-            <h3>{answer.text}</h3>
-          </button>
-        ))}
-      </div>
-      <div className="flex flex-col p-10">
-        <progress
-          className="progress mx-auto w-96"
-          value={props.time}
-          max="30"
-        ></progress>
-        <h3 className="text-xl font-bold ">{props.currentIndex + 1}/5</h3>
-      </div>
+      {props.show && (
+        <>
+          <h1 className="text-center text-2xl font-bold">
+            {props.question.name}
+          </h1>
+          <div className="mt-10 grid grid-cols-2 gap-2">
+            {props.question.answers.map((answer, index) => (
+              <button
+                className="btn btn-accent btn-outline h-24 text-lg"
+                key={index}
+              >
+                <h3>{answer.text}</h3>
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-col p-10">
+            <progress
+              className="progress mx-auto w-96"
+              value={props.time}
+              max="30"
+            ></progress>
+            <h3 className="text-center text-xl font-bold">
+              {props.currentIndex + 1}/5
+            </h3>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -329,7 +338,7 @@ function ShowQuizStarting(props: QuizStartingInterface) {
   return (
     <div className="flex flex-col items-center">
       <h1 className="text-4xl font-bold">Quizet börjar om</h1>
-      <h2 className="text-2xl font-bold">{props.time}</h2>
+      <h2 className="text-2xl font-bold">{5 - Math.floor(props.time)}</h2>
     </div>
   );
 }
@@ -348,6 +357,7 @@ function PrepareForQuiz(questionData: Question[]): SimpleQuestion[] {
       correct: true,
     });
     questions.push({
+      id: question.id,
       name: question.text,
       songId: question.content,
       answers: answers,
