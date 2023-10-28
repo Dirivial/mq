@@ -221,6 +221,7 @@ export default function Room() {
               <ShowCurrentQuestion
                 question={
                   questions.at(currentIndex) ?? {
+                    id: 0,
                     name: "",
                     songId: "",
                     answers: [],
