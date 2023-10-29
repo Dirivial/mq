@@ -47,7 +47,9 @@ export default function Room() {
   const [showQuestion, setShowQuestion] = useState(false);
 
   const { data: questionData, isSuccess: gotQuestions } =
-    api.question.getSomeQuestions.useQuery();
+    api.question.getSomeQuestions.useQuery(undefined, {
+      enabled: questions.length === 0,
+    });
 
   const addMemberToList = (name: string) => {
     setMembers((prev) => [...prev, name]);
