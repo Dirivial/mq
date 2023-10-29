@@ -28,12 +28,30 @@ export default function Play() {
   const router = useRouter();
   const session = useSession();
   const [pusher, setPusher] = useState<Pusher | null>(null);
+  const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
+
+  /* 
+    Realistically this could change if we lean into having a "quiz" rather than a list of questions.
+    It seems redundant to have two arrays for the questions.
+  */
   const [questionIds, setQuestionIds] = useState<number[]>([]);
   const [questions, setQuestions] = useState<SimpleQuestion[]>([]);
-  const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
+
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  const [answer, setAnswer] = useState<string>("");
+
+  // Used to know how quickly they responded to a question (and also to trigger events etc.).
+  const [timePassed, setTimePassed] = useState<number>(0);
+
+  // Keep track of the results of each question
+  const [results, setResults] = useState<boolean[]>([]);
+
+  // TODO: We should cache the questions so that the server doesn't have to do a db call every time
   const { data: questionData, isSuccess: gotQuestions } =
-    api.question.getGroupOfQuestions.useQuery({ ids: questionIds });
+    api.question.getGroupOfQuestions.useQuery(
+      { ids: questionIds },
+      { enabled: questionIds.length > 0 && questions.length === 0 },
+    );
 
   const initPusher = () => {
     const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
@@ -41,21 +59,27 @@ export default function Play() {
     });
 
     const channel = p.subscribe("game@" + router.query.slug?.toString());
+    // Handle game start
     channel.bind("start", function (data: GameStart) {
       setQuestionIds(data.questionIds);
-      console.log("Game started with questions ", data.questionIds);
-      // TODO: Fetch questions from db
-      // We want to fetch the questions to lessen the load on the socket server
-      // (Also, we should cache the questions so that the server doesn't have to do a db call every time)
     });
+    // Handle a new question
     channel.bind("new-question", function (data: NewQuestion) {
       console.log("New question ", data.newQuestionIndex);
       setCurrentIndex(data.newQuestionIndex);
+      setTimePassed(0);
+    });
+    // Handle end of question
+    channel.bind("end-question", function (data: number) {
+      console.log("End question ", data);
+      setTimePassed(0);
+      // Maybe show a correct/incorrect message? And possibly add the score in a fun way.
     });
 
     setPusher(p);
   };
 
+  // Send info to the host that we've joined the game
   const sendCall = () => {
     if (!router.query.slug || router.query.slug.at(0) === "") return;
 
@@ -75,6 +99,10 @@ export default function Play() {
       });
   };
 
+  /*
+    This converts all the questions to a more digestible format.
+    I hate that it's in a useEffect, but I currently don't know how to do it in a different way due to tRPC + useQuery.
+  */
   useEffect(() => {
     if (gotQuestions && questions.length === 0 && questionData.length > 0) {
       console.log(questionData);
@@ -100,6 +128,15 @@ export default function Play() {
       setQuestions(questions);
     }
   }, [questionData, gotQuestions, questions]);
+
+  // TODO: Decide if scores should be sent to the host, or calculated by the host (probably the former, since it's easier)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimePassed((timePassed) => timePassed + 0.1);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="">
@@ -129,6 +166,7 @@ export default function Play() {
                           }
                         }
                         currentIndex={currentIndex}
+                        setAnswer={setAnswer}
                       />
                     </>
                   )}
@@ -162,6 +200,7 @@ export default function Play() {
 interface CurrentQuestionInterface {
   question: SimpleQuestion;
   currentIndex: number;
+  setAnswer: (answer: string) => void;
 }
 
 function ShowCurrentQuestion(props: CurrentQuestionInterface) {
@@ -173,6 +212,7 @@ function ShowCurrentQuestion(props: CurrentQuestionInterface) {
           <button
             className="btn btn-accent btn-outline h-24 text-lg"
             key={index}
+            onClick={() => props.setAnswer(answer.text)}
           >
             <h3>{answer.text}</h3>
           </button>
