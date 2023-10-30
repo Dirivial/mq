@@ -125,23 +125,21 @@ export default function Room() {
   };
 
   useEffect(() => {
-    const sendNext = (newIndex: number) => {
+    const sendNext = (nextQuestionIndex: number) => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
-      fetch(
-        "/api/room/" +
-          (router.query.slug.toString() ?? "no-room") +
-          "/new-question",
-        {
-          method: "POST",
-          body: JSON.stringify({ newQuestionIndex: newIndex }),
-        },
-      )
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      GenericBroadcast(router.query.slug.toString() ?? "no-room", "next", {
+        newQuestionIndex: nextQuestionIndex,
+      });
+    };
+
+    const handleGameEnd = () => {
+      if (!router.query.slug || router.query.slug.at(0) === "") return;
+      GenericBroadcast(router.query.slug.toString() ?? "no-room", "end", {
+        topThree: [],
+      });
+      setPhase("results");
+      Pause();
+      void ClearQueueFull();
     };
 
     const interval = setInterval(() => {
@@ -162,9 +160,7 @@ export default function Room() {
             })
             .catch(() => console.log("Error skipping to next song"));
         } else {
-          setPhase("results");
-          Pause();
-          void ClearQueueFull();
+          handleGameEnd();
         }
       } else if (phase === "starting" && counter > 5) {
         setPhase("playing");
@@ -290,6 +286,19 @@ export default function Room() {
       </div>
     </>
   );
+}
+
+function GenericBroadcast(roomId: string, action: string, body: unknown) {
+  fetch("/api/room/" + roomId + "/" + action, {
+    method: "POST",
+    body: JSON.stringify(body),
+  })
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 }
 
 interface CurrentQuestionInterface {

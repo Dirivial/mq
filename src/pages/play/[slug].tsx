@@ -38,7 +38,7 @@ export default function Play() {
   const [questions, setQuestions] = useState<SimpleQuestion[]>([]);
 
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
-  const [answer, setAnswer] = useState<string>("");
+  const [score, setScore] = useState<number>(0);
 
   // Used to know how quickly they responded to a question (and also to trigger events etc.).
   const [timePassed, setTimePassed] = useState<number>(0);
@@ -53,30 +53,62 @@ export default function Play() {
       { enabled: questionIds.length > 0 && questions.length === 0 },
     );
 
+  const displayResult = () => {
+    console.log("Display result");
+    console.log(results);
+  };
+
   const initPusher = () => {
     const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: "eu",
     });
 
     const channel = p.subscribe("game@" + router.query.slug?.toString());
+
     // Handle game start
     channel.bind("start", function (data: GameStart) {
       setQuestionIds(data.questionIds);
     });
+
     // Handle a new question
     channel.bind("new-question", function (data: NewQuestion) {
-      console.log("New question ", data.newQuestionIndex);
       setCurrentIndex(data.newQuestionIndex);
       setTimePassed(0);
     });
+
     // Handle end of question
     channel.bind("end-question", function (data: number) {
       console.log("End question ", data);
       setTimePassed(0);
       // Maybe show a correct/incorrect message? And possibly add the score in a fun way.
+      displayResult();
+    });
+
+    // Handle end of game
+    channel.bind("end", function (data: number) {
+      console.log("End game ", data);
+      setTimePassed(0);
     });
 
     setPusher(p);
+  };
+
+  // Send score to the host when answering a question
+  const sendScore = (score: number) => {
+    if (!router.query.slug || router.query.slug.at(0) === "") return;
+
+    fetch("/api/room/" + (router.query.slug.toString() ?? "") + "/score", {
+      method: "POST",
+      body: JSON.stringify({ player: session.data?.user?.name, score: score }),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          console.log("Score sent");
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   // Send info to the host that we've joined the game
@@ -108,7 +140,23 @@ export default function Play() {
       console.log(questionData);
       const questions: SimpleQuestion[] = [];
 
-      questionData.forEach((question) => {
+      // Order the questions in the same order as the questionIds - to make sure they're in the same order as the host
+      const orderedQuestions: {
+        id: number;
+        type: string;
+        text: string;
+        content: string;
+        answer: string;
+        falseAnswers: string[];
+        lastPicked: Date;
+      }[] = [];
+      questionIds.forEach((id) => {
+        const q = questionData.find((q) => q.id === id);
+        if (q) orderedQuestions.push(q);
+      });
+
+      // Convert the questions to a more digestible format
+      orderedQuestions.forEach((question) => {
         // Construct question object for this question
         const answers = question.falseAnswers.map((answer) => ({
           text: answer,
@@ -127,7 +175,7 @@ export default function Play() {
 
       setQuestions(questions);
     }
-  }, [questionData, gotQuestions, questions]);
+  }, [questionData, gotQuestions, questions, questionIds]);
 
   // TODO: Decide if scores should be sent to the host, or calculated by the host (probably the former, since it's easier)
   useEffect(() => {
@@ -166,7 +214,20 @@ export default function Play() {
                           }
                         }
                         currentIndex={currentIndex}
-                        setAnswer={setAnswer}
+                        setAnswer={(ans) => {
+                          if (results.length === currentIndex) {
+                            if (ans) {
+                              sendScore(score + 1);
+                              setScore((score) => score + 1);
+                              setResults((results) => [...results, true]);
+                            } else {
+                              setResults((results) => [...results, false]);
+                              sendScore(score);
+                            }
+
+                            console.log(results);
+                          }
+                        }}
                       />
                     </>
                   )}
@@ -200,7 +261,7 @@ export default function Play() {
 interface CurrentQuestionInterface {
   question: SimpleQuestion;
   currentIndex: number;
-  setAnswer: (answer: string) => void;
+  setAnswer: (answer: boolean) => void;
 }
 
 function ShowCurrentQuestion(props: CurrentQuestionInterface) {
@@ -212,7 +273,7 @@ function ShowCurrentQuestion(props: CurrentQuestionInterface) {
           <button
             className="btn btn-accent btn-outline h-24 text-lg"
             key={index}
-            onClick={() => props.setAnswer(answer.text)}
+            onClick={() => props.setAnswer(answer.correct)}
           >
             <h3>{answer.text}</h3>
           </button>
