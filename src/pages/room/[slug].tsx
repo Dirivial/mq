@@ -128,9 +128,13 @@ export default function Room() {
   useEffect(() => {
     const sendNext = (nextQuestionIndex: number) => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
-      GenericBroadcast(router.query.slug.toString() ?? "no-room", "next", {
-        newQuestionIndex: nextQuestionIndex,
-      });
+      GenericBroadcast(
+        router.query.slug.toString() ?? "no-room",
+        "new-question",
+        {
+          newQuestionIndex: nextQuestionIndex,
+        },
+      );
     };
 
     const handleGameEnd = () => {
@@ -199,9 +203,9 @@ export default function Room() {
         onLoad={() => void tryAuthorize()}
       />
       <div className="flex h-[100vh] flex-grow flex-col items-center">
-      <GoBackButton />
+        <GoBackButton />
         <main className="mx-auto my-auto flex h-[50vh] w-4/5 flex-col items-center justify-center">
-          <h1 className="text-6xl font-extrabold md:text-7xl mb-12">
+          <h1 className="mb-12 text-6xl font-extrabold md:text-7xl">
             Quizroom
           </h1>
 
@@ -242,34 +246,38 @@ export default function Room() {
 
           {phase === "waiting" && (
             <>
-          <div className="mb-8 flex flex-col items-center gap-3 text-center">
-            <div>
-            <span className="text-lg font-semibold text-gray-600">Rum ID</span>
-            <div className="text-3xl font-bold text-accent">{router.query.slug}</div>
-            </div>
-            {pusher != null ? (
-              <div className="flex flex-col items-center">
-                {/* <span className="mb-2 text-sm text-gray-500">{pusher.connection.state}</span> */}
-                <QRCode
-                  className="rounded-md bg-white p-2"
-                  value={getURL()}
-                />
+              <div className="mb-8 flex flex-col items-center gap-3 text-center">
+                <div>
+                  <span className="text-lg font-semibold text-gray-600">
+                    Rum ID
+                  </span>
+                  <div className="text-3xl font-bold text-accent">
+                    {router.query.slug}
+                  </div>
+                </div>
+                {pusher != null ? (
+                  <div className="flex flex-col items-center">
+                    {/* <span className="mb-2 text-sm text-gray-500">{pusher.connection.state}</span> */}
+                    <QRCode
+                      className="rounded-md bg-white p-2"
+                      value={getURL()}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-wide"
+                    onClick={openRoom}
+                  >
+                    Öppna Rum
+                  </button>
+                )}
+                <button
+                  className="btn btn-primary btn-wide mt-4"
+                  onClick={sendStart}
+                >
+                  Starta
+                </button>
               </div>
-            ) : (
-              <button
-                className="btn btn-primary btn-wide"
-                onClick={openRoom}
-              >
-                Öppna Rum
-              </button>
-            )}
-            <button
-              className="btn btn-primary btn-wide mt-4"
-              onClick={sendStart}
-            >
-              Starta
-            </button>
-          </div>
 
               <div className="">
                 <div className="mb-4 grid grid-cols-1 grid-rows-2">
