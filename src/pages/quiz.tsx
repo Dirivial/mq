@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import GoBackButton from "~/components/GoBackButton";
 
 import {
   SkipToNext,
@@ -129,15 +130,15 @@ export default function Quiz() {
         <meta name="description" content="Nu är det dags för QUIZ!." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen items-center justify-center">
-        <div className="container flex flex-col items-center gap-12 px-4 py-16 text-center">
+      <main className="flex flex-col min-h-screen items-center justify-center text-center">
+      <GoBackButton />
           <Link
             href={"/quizmaster"}
             onClick={() => {
               Pause();
               void ClearQueueFull();
             }}
-            className="text-[clamp(4rem,17vw,6rem)] md:text-[clamp(4rem,8vw,6rem)] font-extrabold tracking-tight"
+            className="text-6xl font-extrabold md:text-7xl mb-12"
           >
             Musik Quiz
           </Link>
@@ -174,7 +175,6 @@ export default function Quiz() {
               <h1 className="text-2xl font-bold text-white">Gör er redo!</h1>
             </div>
           )}
-        </div>
       </main>
     </>
   );

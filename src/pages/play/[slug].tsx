@@ -4,6 +4,7 @@ import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
+import GoBackButton from "~/components/GoBackButton";
 
 interface GameStart {
   questionIds: number[];
@@ -189,6 +190,7 @@ export default function Play() {
   return (
     <div className="">
       <main className=" bg-base flex min-h-screen flex-col items-center text-base-content">
+      <GoBackButton />
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           {!successfullJoin ||
             (questionIds === undefined && (

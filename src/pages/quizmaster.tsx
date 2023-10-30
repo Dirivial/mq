@@ -34,60 +34,53 @@ export default function QuizMaster() {
       });
   };
 
+  interface ActionButtonProps {
+    onClick: () => void;
+    label: string;
+    outline?: boolean;
+  }
+
+  function ActionButton({ onClick, label, outline = false }: ActionButtonProps) {
+    const buttonClass = `btn btn-wide ${outline ? 'btn-outline' : ''} btn-primary`;
+    return (
+      <button onClick={onClick} className={buttonClass}>
+        {label}
+      </button>
+    );
+  }
+
   return (
     <>
       <Head>
-        <title>MQ</title>
+        <title>MQ - QuizMaster</title>
         <meta name="description" content="Dashboard för quizmasters." />
-        <meta
-          name="apple-music-developer-token"
-          content={env.NEXT_PUBLIC_APPLE_DEVELOPER_TOKEN}
-        />
+        <meta name="apple-music-developer-token" content={env.NEXT_PUBLIC_APPLE_DEVELOPER_TOKEN} />
         <meta name="apple-music-app-name" content="My Cool App" />
         <meta name="apple-music-app-build" content="1.0" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Script
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
-        onLoad={() => void tryAuthorize()}
+        onLoad={tryAuthorize} // Assuming tryAuthorize is defined elsewhere
       />
-      <main className="flex min-h-screen items-center justify-center">
-        <div className="container flex flex-col items-center gap-12 px-4 py-16 text-center">
-          <h1 className="text-[clamp(5rem,10vw,12rem)] md:text-[clamp(8rem,10vw,12rem)] font-extrabold ">
+      <main className="min-h-screen flex items-center justify-center bg-background">
+        <div className="container mx-auto p-4 text-center">
+          <h1 className="text-6xl font-extrabold md:text-7xl mb-12">
             QuizMaster
           </h1>
-          <button
-            onClick={startQuiz}
-            className="btn btn-wide btn-primary"
-          >
-            Starta Quiz
-          </button>
-          <button
-            onClick={openRoom}
-            className="btn btn-wide btn-primary"
-          >
-            Öppna ett Rum
-          </button>
-          {!isAuthorized && (
-            <button
-              onClick={() => void tryAuthorize()}
-              className="btn btn-wide btn-primary"
-            >
-              Anslut till Apple Music
-            </button>
-          )}
-          <div className="w-1/2 my-4">
-            <div className="divider">eller</div>
+          <div className="flex flex-col items-center gap-4">
+            <ActionButton onClick={startQuiz} label="Starta Quiz" />
+            <ActionButton onClick={openRoom} label="Öppna ett Rum" />
+            {!isAuthorized && <ActionButton onClick={tryAuthorize} label="Anslut till Apple Music" />}
+            <div className="w-full my-4">
+              <div className="divider">eller</div>
+            </div>
+            <ActionButton onClick={signOut} label="Logga ut" outline />
           </div>
-          <button
-            onClick={void signOut}
-            className="btn btn-wide btn-outline btn-primary"
-          >
-            Logga ut
-          </button>
         </div>
       </main>
     </>
   );
+}
   
-  }
+
