@@ -61,10 +61,11 @@ model VerificationToken {
 }
 
 model Quiz {
-    id        Int              @id @default(autoincrement())
-    name      String
-    gameModes Int[]
-    questions QuestionToQuiz[]
+    id          Int              @id @default(autoincrement())
+    name        String
+    description String
+    gameModes   Int[]
+    questions   QuestionToQuiz[]
 }
 
 model QuestionToQuiz {
