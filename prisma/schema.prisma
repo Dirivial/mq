@@ -60,6 +60,22 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
+model Quiz {
+    id        Int              @id @default(autoincrement())
+    name      String
+    gameModes Int[]
+    questions QuestionToQuiz[]
+}
+
+model QuestionToQuiz {
+    question   Question @relation(fields: [questionId], references: [id])
+    questionId Int
+    quiz       Quiz     @relation(fields: [quizId], references: [id])
+    quizId     Int
+
+    @@id([questionId, quizId])
+}
+
 model Question {
     id           Int                  @id @default(autoincrement())
     type         String
@@ -69,6 +85,7 @@ model Question {
     falseAnswers String[]
     lastPicked   DateTime
     categories   QuestionToCategory[]
+    quizzes      QuestionToQuiz[]
 }
 
 model Category {
