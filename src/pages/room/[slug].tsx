@@ -31,7 +31,14 @@ type Answer = {
   correct: boolean;
 };
 
+type Player = {
+  id: string;
+  name: string;
+  score: number;
+};
+
 interface UserJoin {
+  id: string;
   name: string;
 }
 
@@ -40,7 +47,7 @@ export default function Room() {
   const session = useSession();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [pusher, setPusher] = useState<Pusher | null>(null);
-  const [members, setMembers] = useState<string[]>([]);
+  const [members, setMembers] = useState<Player[]>([]);
   const [questions, setQuestions] = useState<SimpleQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState("waiting");
@@ -52,8 +59,15 @@ export default function Room() {
       enabled: questions.length === 0,
     });
 
-  const addMemberToList = (name: string) => {
-    setMembers((prev) => [...prev, name]);
+  const addMemberToList = (id: string, name: string) => {
+    setMembers((prev) => [...prev, { id: id, name: name, score: 0 }]);
+  };
+
+  const getTopPlayers = () => {
+    if (members.length > 3) {
+      return members.sort((a, b) => b.score - a.score).slice(0, 3);
+    }
+    return members.sort((a, b) => b.score - a.score);
   };
 
   const sendStart = () => {
@@ -88,14 +102,40 @@ export default function Room() {
     });
 
     const channel = p.subscribe("game@" + router.query.slug?.toString());
+
+    // Listen for join events
     channel.bind("join", function (data: UserJoin) {
       try {
         const name = data.name;
-        if (name === undefined) {
+        const id = data.id;
+        if (name === undefined || id === undefined) {
           throw new Error("Player joined with undefined credentials");
         } else {
           console.log("Player joined with name " + name);
-          addMemberToList(name);
+          addMemberToList(id, name);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    });
+
+    // Listen for score events
+    channel.bind("score", function (data: { id: string; score: number }) {
+      try {
+        const id = data.id;
+        const score = data.score;
+        if (id === undefined || score === undefined) {
+          throw new Error("Player scored with undefined credentials");
+        } else {
+          setMembers((prev) =>
+            prev.map((p) => {
+              if (p.id === id) {
+                return { ...p, score: score };
+              } else {
+                return p;
+              }
+            }),
+          );
         }
       } catch (e) {
         console.log(e);
@@ -137,6 +177,7 @@ export default function Room() {
       );
     };
 
+    // TODO: Implement this
     const handleGameEnd = () => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
       GenericBroadcast(router.query.slug.toString() ?? "no-room", "end", {
@@ -217,6 +258,16 @@ export default function Room() {
               <h2 className="text-center text-xl font-extrabold tracking-tight text-base-content sm:text-[2rem]">
                 Här kommer resultaten
               </h2>
+              <ul>
+                {getTopPlayers().map((user, index) => (
+                  <li
+                    key={index}
+                    className="text-center text-xl font-extrabold tracking-tight text-base-content sm:text-[2rem]"
+                  >
+                    {user.name} - {user.score}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
@@ -288,7 +339,7 @@ export default function Room() {
                   <h2 className="text-center text-2xl font-bold">Spelare</h2>
                   <ul className="text-base-content">
                     {members.map((member, index) => (
-                      <li key={index}>{member}</li>
+                      <li key={index}>{member.name}</li>
                     ))}
                   </ul>
                 </div>

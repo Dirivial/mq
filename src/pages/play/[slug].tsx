@@ -55,8 +55,7 @@ export default function Play() {
     );
 
   const displayResult = () => {
-    console.log("Display result");
-    console.log(results);
+    console.log("Display result", results);
   };
 
   const initPusher = () => {
@@ -100,7 +99,7 @@ export default function Play() {
 
     fetch("/api/room/" + (router.query.slug.toString() ?? "") + "/score", {
       method: "POST",
-      body: JSON.stringify({ player: session.data?.user?.name, score: score }),
+      body: JSON.stringify({ id: session.data?.user?.id, score: score }),
     })
       .then((res) => {
         if (res.status === 200) {
@@ -120,7 +119,10 @@ export default function Play() {
 
     fetch("/api/room/" + (router.query.slug.toString() ?? "") + "/join", {
       method: "POST",
-      body: JSON.stringify({ name: session.data?.user?.name }),
+      body: JSON.stringify({
+        id: session.data?.user.id,
+        name: session.data?.user?.name,
+      }),
     })
       .then((res) => {
         if (res.status === 200) {
@@ -130,6 +132,23 @@ export default function Play() {
       .catch((e) => {
         console.log(e);
       });
+  };
+
+  // Handle player answering a question
+  const handleAnswer = (correct: boolean) => {
+    // Only allow answering once
+    if (results.length === currentIndex) {
+      if (correct) {
+        sendScore(score + 1);
+        setScore((score) => score + 1);
+        setResults((results) => [...results, true]);
+      } else {
+        setResults((results) => [...results, false]);
+        sendScore(score);
+      }
+
+      console.log(results);
+    }
   };
 
   /*
@@ -190,7 +209,7 @@ export default function Play() {
   return (
     <div className="">
       <main className=" bg-base flex min-h-screen flex-col items-center text-base-content">
-      <GoBackButton />
+        <GoBackButton />
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           {!successfullJoin ||
             (questionIds === undefined && (
@@ -216,20 +235,7 @@ export default function Play() {
                           }
                         }
                         currentIndex={currentIndex}
-                        setAnswer={(ans) => {
-                          if (results.length === currentIndex) {
-                            if (ans) {
-                              sendScore(score + 1);
-                              setScore((score) => score + 1);
-                              setResults((results) => [...results, true]);
-                            } else {
-                              setResults((results) => [...results, false]);
-                              sendScore(score);
-                            }
-
-                            console.log(results);
-                          }
-                        }}
+                        setAnswer={handleAnswer}
                       />
                     </>
                   )}
