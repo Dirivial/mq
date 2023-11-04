@@ -61,47 +61,28 @@ model VerificationToken {
 }
 
 model Quiz {
-    id          Int              @id @default(autoincrement())
+    id          Int        @id @unique @default(autoincrement())
     name        String
     description String
     gameModes   Int[]
-    questions   QuestionToQuiz[]
-}
-
-model QuestionToQuiz {
-    question   Question @relation(fields: [questionId], references: [id])
-    questionId Int
-    quiz       Quiz     @relation(fields: [quizId], references: [id])
-    quizId     Int
-
-    @@id([questionId, quizId])
+    questions   Question[]
 }
 
 model Question {
-    id           Int                  @id @default(autoincrement())
+    id           Int        @id @unique @default(autoincrement())
     type         String
-    text         String               @default("")
+    text         String     @default("")
     content      String
     answer       String // Will there be questions where the user types in answer? If so, this should probably be an array
     falseAnswers String[]
     lastPicked   DateTime
-    categories   QuestionToCategory[]
-    quizzes      QuestionToQuiz[]
+    categories   Category[]
+    quizzes      Quiz[]
 }
 
 model Category {
-    id        Int                  @id @default(autoincrement())
+    id        Int        @id @default(autoincrement())
     name      String
     color     String
-    questions QuestionToCategory[]
-}
-
-// Many-to-Many relationship between questions and categories -> a question can belong in multiple categories, a category can have multiple questions
-model QuestionToCategory {
-    question   Question @relation(fields: [questionId], references: [id])
-    questionId Int
-    category   Category @relation(fields: [categoryId], references: [id])
-    categoryId Int
-
-    @@id([questionId, categoryId])
+    questions Question[]
 }
