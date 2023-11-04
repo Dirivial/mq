@@ -64,7 +64,7 @@ model Quiz {
     id          Int        @id @unique @default(autoincrement())
     name        String
     description String
-    gameModes   Int[]
+    gameModes   Int[] // This could reasonably be an enum or json
     questions   Question[]
 }
 
