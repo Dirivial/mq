@@ -24,9 +24,7 @@ type Answer = {
   correct: boolean;
 };
 
-const NUM_QUESTIONS = 5;
-
-export default function Quiz() {
+export default function QuizCreator() {
   const [timePassed, setTimePassed] = useState(0);
 
   const { isLoading: questionsLoading, data: questionData } =
@@ -130,53 +128,55 @@ export default function Quiz() {
         <meta name="description" content="Nu är det dags för QUIZ!." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex flex-col min-h-screen items-center justify-center text-center">
-      <GoBackButton />
-          <Link
-            href={"/quizmaster"}
-            onClick={() => {
-              Pause();
-              void ClearQueueFull();
-            }}
-            className="text-6xl font-extrabold md:text-7xl mb-12"
-          >
-            Musik Quiz
-          </Link>
-          {gameOver ? (
-            <div>
-              <h1 className="text-4xl font-bold ">Bra Spelat!</h1>
-              <h3 className="text-xl font-bold ">(Statistik...)</h3>
+      <main className="flex min-h-screen flex-col items-center justify-center text-center">
+        <GoBackButton />
+        <Link
+          href={"/quizmaster"}
+          onClick={() => {
+            Pause();
+            void ClearQueueFull();
+          }}
+          className="mb-12 text-6xl font-extrabold md:text-7xl"
+        >
+          Musik Quiz
+        </Link>
+        {gameOver ? (
+          <div>
+            <h1 className="text-4xl font-bold ">Bra Spelat!</h1>
+            <h3 className="text-xl font-bold ">(Statistik...)</h3>
+          </div>
+        ) : showQuestion ? (
+          <div>
+            <h1 className="text-2xl font-bold ">
+              {questions.at(currentIndex)?.name ?? "(Inget ifyllt)?"}
+            </h1>
+            <div className="mt-10 grid grid-cols-2 gap-2">
+              {questions.at(currentIndex)?.answers?.map((answer, index) => (
+                <button
+                  className="btn btn-accent btn-outline h-24 text-lg"
+                  key={index}
+                >
+                  <h3>{answer.text}</h3>
+                </button>
+              ))}
             </div>
-          ) : showQuestion ? (
-            <div>
-              <h1 className="text-2xl font-bold ">
-                {questions.at(currentIndex)?.name ?? "(Inget ifyllt)?"}
-              </h1>
-              <div className="mt-10 grid grid-cols-2 gap-2">
-                {questions.at(currentIndex)?.answers?.map((answer, index) => (
-                  <button className="btn btn-outline btn-accent h-24 text-lg" key={index}>
-                    <h3>{answer.text}</h3>
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-col p-10">
-                <progress
-                  className="progress mx-auto w-96"
-                  value={timePassed}
-                  max="30"
-                ></progress>
-                <h3 className="text-xl font-bold ">
-                  {currentIndex + 1}/{NUM_QUESTIONS}
-                </h3>
-              </div>
+            <div className="flex flex-col p-10">
+              <progress
+                className="progress mx-auto w-96"
+                value={timePassed}
+                max="30"
+              ></progress>
+              <h3 className="text-xl font-bold ">
+                {currentIndex + 1}/{NUM_QUESTIONS}
+              </h3>
             </div>
-          ) : (
-            <div>
-              <h1 className="text-2xl font-bold text-white">Gör er redo!</h1>
-            </div>
-          )}
+          </div>
+        ) : (
+          <div>
+            <h1 className="text-2xl font-bold text-white">Gör er redo!</h1>
+          </div>
+        )}
       </main>
     </>
   );
-  
 }

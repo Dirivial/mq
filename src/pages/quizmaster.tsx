@@ -14,9 +14,8 @@ export default function QuizMaster() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(true);
 
-  const startQuiz = () => {
-    console.log("Starting quiz...");
-    router.push("/quiz");
+  const createQuiz = () => {
+    router.push("/quizcreator");
   };
 
   const openRoom = () => {
@@ -78,7 +77,7 @@ export default function QuizMaster() {
             QuizMaster
           </h1>
           <div className="flex flex-col items-center gap-4">
-            <ActionButton onClick={startQuiz} label="Starta Quiz" />
+            <ActionButton onClick={createQuiz} label="Skapa Quiz" />
             <ActionButton onClick={openRoom} label="Öppna ett Rum" />
             {!isAuthorized && (
               <ActionButton
