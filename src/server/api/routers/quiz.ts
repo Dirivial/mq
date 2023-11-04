@@ -23,7 +23,16 @@ export const questionRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const quiz = await ctx.db.quiz.create({ data: input });
+      const quiz = await ctx.db.quiz.create({
+        data: {
+          name: input.name,
+          description: input.description,
+          questions: {
+            connect: input.questions.map((question) => ({ id: question })),
+          },
+          gameModes: input.gameModes,
+        },
+      });
 
       return quiz;
     }),
