@@ -1,6 +1,8 @@
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useRouter } from 'next/router';
 import Head from "next/head";
 import Link from "next/link";
+import Navbar from "~/components/NavBar";
 
 import { api } from "~/utils/api";
 
@@ -8,7 +10,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>MQ</title>
+        <title>Melody Masters</title>
         <meta name="description" content="En webapp för musikquiz." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -25,7 +27,7 @@ export default function Home() {
 function Header() {
   return (
     <header className="mb-10">
-      <h1 className="text-6xl font-extrabold tracking-tight md:text-7xl">MQ</h1>
+      <h1 className="text-6xl font-extrabold tracking-tight md:text-7xl">Melody <br/> Masters</h1>
       <p className="mt-3 text-lg md:text-xl">Quizet för musikälskaren</p>
     </header>
   );
@@ -41,12 +43,9 @@ function AuthShowcase() {
   );
 
   return (
-    <div className="w-full">
-      {sessionData && (
-        <div className="absolute left-0 right-0 top-0 bg-primary p-4 text-center text-base-100">
-          Inloggad som {sessionData.user?.email}
-        </div>
-      )}
+  
+    <div>
+
       <div className="flex flex-col items-center justify-center gap-4">
         {secretMessage && (
           <Link href="/quizmaster" className="btn btn-primary btn-wide">

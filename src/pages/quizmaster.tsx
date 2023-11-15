@@ -1,14 +1,11 @@
 import Head from "next/head";
 import { signOut } from "next-auth/react";
-
-import { env } from "~/env.mjs";
-
+import { env } from "~/env.mjs"
 import { useRouter } from "next/navigation";
-
 import { ConfigureMusicKit } from "~/utils/musicPlayer";
-
 import Script from "next/script";
 import { useState } from "react";
+import Navbar from "~/components/NavBar";
 
 export default function QuizMaster() {
   const router = useRouter();

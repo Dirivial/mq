@@ -3,6 +3,9 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import { useEffect } from 'react';
 import { api } from "~/utils/api";
+import Navbar from "~/components/NavBar";
+import { AuthContext } from "~/components/authContext";
+
 
 import "~/styles/globals.css";
 
@@ -17,7 +20,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      <AuthContext.Provider value={{ session }}>
+        <Navbar />
+        <Component {...pageProps} />
+      </AuthContext.Provider>
     </SessionProvider>
   );
 };
