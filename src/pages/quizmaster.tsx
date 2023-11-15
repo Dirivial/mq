@@ -70,9 +70,7 @@ export default function QuizMaster() {
       />
       <main className="bg-background flex min-h-screen items-center justify-center">
         <div className="container mx-auto p-4 text-center">
-          <h1 className="mb-12 text-6xl font-extrabold md:text-7xl">
-            QuizMaster
-          </h1>
+
           <div className="flex flex-col items-center gap-4">
             <ActionButton onClick={createQuiz} label="Skapa Quiz" />
             <ActionButton onClick={openRoom} label="Öppna ett Rum" />
