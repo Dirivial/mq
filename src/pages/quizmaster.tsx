@@ -68,7 +68,7 @@ export default function QuizMaster() {
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
         onLoad={() => void tryAuthorize()} // Assuming tryAuthorize is defined elsewhere
       />
-      <main className="bg-background flex min-h-screen items-center justify-center">
+      <main className="flex flex-1 items-center justify-center">
         <div className="container mx-auto p-4 text-center">
 
           <div className="flex flex-col items-center gap-4">
@@ -80,14 +80,14 @@ export default function QuizMaster() {
                 label="Anslut till Apple Music"
               />
             )}
-            <div className="my-4 w-full">
-              <div className="divider">eller</div>
-            </div>
-            <ActionButton
+            {/*<div className="my-4 w-full">
+              <div className="divider"></div>
+            </div>*/}
+            {/*<ActionButton
               onClick={() => void signOut()}
               label="Logga ut"
               outline
-            />
+            />*/}
           </div>
         </div>
       </main>

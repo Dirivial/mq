@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { api } from "~/utils/api";
 import Navbar from "~/components/NavBar";
 import { AuthContext } from "~/components/authContext";
+import Footer from "~/components/Footer";
 
 
 import "~/styles/globals.css";
@@ -15,14 +16,19 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'night');
+    document.documentElement.setAttribute('data-theme', 'synthwave');
   }, []);
 
   return (
     <SessionProvider session={session}>
       <AuthContext.Provider value={{ session }}>
-        <Navbar />
-        <Component {...pageProps} />
+        <div className="flex flex-col h-screen">
+          <Navbar />
+          <div className="flex flex-1"> 
+            <Component {...pageProps} />
+          </div>
+          <Footer />
+        </div>
       </AuthContext.Provider>
     </SessionProvider>
   );

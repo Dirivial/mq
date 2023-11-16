@@ -34,18 +34,18 @@ export default function QuizCreator() {
         <meta name="description" content="Nu är det dags för QUIZ!." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center text-center">
+      <main className="flex flex-1 flex-col items-center justify-center">
         <GoBackButton />
-        <Link
-          href={"/quizmaster"}
-          onClick={() => {
-            Pause();
-            void ClearQueueFull();
-          }}
-          className="mb-12 text-6xl font-extrabold md:text-7xl"
-        >
-          Skapa Quiz
-        </Link>
+          <Link
+            href={"/quizmaster"}
+            onClick={() => {
+              Pause();
+              void ClearQueueFull();
+            }}
+            className="mb-12 text-6xl font-extrabold md:text-7xl"
+          >
+            Skapa Quiz
+          </Link>
       </main>
     </>
   );

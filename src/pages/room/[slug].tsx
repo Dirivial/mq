@@ -243,13 +243,9 @@ export default function Room() {
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
         onLoad={() => void tryAuthorize()}
       />
-      <div className="flex h-[100vh] flex-grow flex-col items-center">
+      <div className="flex flex-1 flex-col items-center">
         <GoBackButton />
         <main className="mx-auto my-auto flex h-[50vh] w-4/5 flex-col items-center justify-center">
-          <h1 className="mb-12 text-6xl font-extrabold md:text-7xl">
-            Quizroom
-          </h1>
-
           {phase === "results" && (
             <div className="my-12 flex h-full flex-col justify-start">
               <h1 className="mb-12 text-center text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
@@ -299,11 +295,11 @@ export default function Room() {
             <>
               <div className="mb-8 flex flex-col items-center gap-3 text-center">
                 <div>
-                  <span className="text-lg font-semibold text-gray-600">
-                    Rum ID
+                  <span className="text-xl font-bold ">
+                    RUM ID
                   </span>
                   <div className="text-3xl font-bold text-accent">
-                    {router.query.slug}
+                    {String(router.query.slug).toUpperCase()}
                   </div>
                 </div>
                 {pusher != null ? (
