@@ -52,6 +52,14 @@ function AuthShowcase() {
             Fortsätt
           </Link>
         )}
+        {!sessionData && (
+          <button
+            className="btn btn-primary btn-wide"
+            onClick={() => void signIn()}
+          >
+            Logga in
+          </button>
+        )}
 
       </div>
     </div>

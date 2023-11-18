@@ -16,7 +16,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'synthwave');
+    document.documentElement.setAttribute('data-theme', 'night');
   }, []);
 
   return (

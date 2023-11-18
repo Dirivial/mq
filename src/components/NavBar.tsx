@@ -7,10 +7,17 @@ const Navbar = () => {
   const { data: sessionData } = useSession();
   const currentPage = String(router.pathname).split('/')[1];
 
-  const handleSignOut = () => {
-    signOut({ redirect: false }).then(() => {
-      router.push('/'); // Replace '/login' with your login route
-    });
+  const handleSignOut = async () => {
+    try {
+      await signOut({ redirect: false });
+      try {
+        await router.push('/');
+      } catch (navError) {
+        console.error('Error during navigation:', navError);
+      }
+    } catch (signOutError) {
+      console.error('Error during sign out:', signOutError);
+    }
   };
 
   const UserIndicator = () => {
@@ -27,7 +34,7 @@ const Navbar = () => {
           </div>
           
           <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52">
-            <li><a onClick={handleSignOut}>Logga ut</a></li>
+            <li><a onClick={void handleSignOut}>Logga ut</a></li>
           </ul>
         </div>
       );
