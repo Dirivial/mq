@@ -8,7 +8,13 @@ type ResponseData = {
 };
 
 const UserJoinSchema = z.object({
+  id: z.string(),
   name: z.string(),
+});
+
+const UserScoreSchema = z.object({
+  id: z.string(),
+  score: z.number(),
 });
 
 const GameStartSchema = z.object({
@@ -40,11 +46,11 @@ export default async function handler(
 
       if (slug?.at(1) === "join") {
         const body = UserJoinSchema.parse(rawData);
-        const name = body.name;
 
         await pusher
           .trigger("game@" + slug?.at(0)?.toString(), "join", {
-            name: name,
+            id: body.id,
+            name: body.name,
           })
           .catch((e) => {
             console.log(e);
@@ -70,6 +76,17 @@ export default async function handler(
           .catch((e) => {
             console.log(e);
           });
+      } else if (slug?.at(1) === "score") {
+        const body = UserScoreSchema.parse(rawData);
+
+        await pusher
+          .trigger("game@" + slug?.at(0)?.toString(), "score", {
+            id: body.id,
+            score: body.score,
+          })
+          .catch((e) => {
+            console.log(e);
+          });
       } else {
         console.log("No action given");
       }
@@ -83,8 +100,6 @@ export default async function handler(
     res.status(400).json({ message: "Invalid body" });
     return;
   }
-
-  console.log(slug);
 
   res.status(200).json({ message: "Request fulfilled." });
 }

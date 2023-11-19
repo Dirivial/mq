@@ -1,22 +1,18 @@
 import Head from "next/head";
 import { signOut } from "next-auth/react";
-
-import { env } from "~/env.mjs";
-
+import { env } from "~/env.mjs"
 import { useRouter } from "next/navigation";
-
 import { ConfigureMusicKit } from "~/utils/musicPlayer";
-
 import Script from "next/script";
 import { useState } from "react";
+import Navbar from "~/components/NavBar";
 
 export default function QuizMaster() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(true);
 
-  const startQuiz = () => {
-    console.log("Starting quiz...");
-    router.push("/quiz");
+  const createQuiz = () => {
+    router.push("/quizcreator");
   };
 
   const openRoom = () => {
@@ -34,10 +30,31 @@ export default function QuizMaster() {
       });
   };
 
+  interface ActionButtonProps {
+    onClick: () => void;
+    label: string;
+    outline?: boolean;
+  }
+
+  function ActionButton({
+    onClick,
+    label,
+    outline = false,
+  }: ActionButtonProps) {
+    const buttonClass = `btn btn-wide ${
+      outline ? "btn-outline" : ""
+    } btn-primary`;
+    return (
+      <button onClick={onClick} className={buttonClass}>
+        {label}
+      </button>
+    );
+  }
+
   return (
     <>
       <Head>
-        <title>MQ</title>
+        <title>MQ - QuizMaster</title>
         <meta name="description" content="Dashboard för quizmasters." />
         <meta
           name="apple-music-developer-token"
@@ -49,45 +66,31 @@ export default function QuizMaster() {
       </Head>
       <Script
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
-        onLoad={() => void tryAuthorize()}
+        onLoad={() => void tryAuthorize()} // Assuming tryAuthorize is defined elsewhere
       />
-      <main className="flex min-h-screen items-center justify-center">
-        <div className="container flex flex-col items-center gap-12 px-4 py-16 text-center">
-          <h1 className="text-[clamp(5rem,10vw,12rem)] md:text-[clamp(8rem,10vw,12rem)] font-extrabold ">
-            QuizMaster
-          </h1>
-          <button
-            onClick={startQuiz}
-            className="btn btn-wide btn-primary"
-          >
-            Starta Quiz
-          </button>
-          <button
-            onClick={openRoom}
-            className="btn btn-wide btn-primary"
-          >
-            Öppna ett Rum
-          </button>
-          {!isAuthorized && (
-            <button
-              onClick={() => void tryAuthorize()}
-              className="btn btn-wide btn-primary"
-            >
-              Anslut till Apple Music
-            </button>
-          )}
-          <div className="w-1/2 my-4">
-            <div className="divider">eller</div>
+      <main className="flex flex-1 items-center justify-center">
+        <div className="container mx-auto p-4 text-center">
+
+          <div className="flex flex-col items-center gap-4">
+            <ActionButton onClick={createQuiz} label="Skapa Quiz" />
+            <ActionButton onClick={openRoom} label="Öppna ett Rum" />
+            {!isAuthorized && (
+              <ActionButton
+                onClick={() => void tryAuthorize()}
+                label="Anslut till Apple Music"
+              />
+            )}
+            {/*<div className="my-4 w-full">
+              <div className="divider"></div>
+            </div>*/}
+            {/*<ActionButton
+              onClick={() => void signOut()}
+              label="Logga ut"
+              outline
+            />*/}
           </div>
-          <button
-            onClick={void signOut}
-            className="btn btn-wide btn-outline btn-primary"
-          >
-            Logga ut
-          </button>
         </div>
       </main>
     </>
   );
-  
-  }
+}

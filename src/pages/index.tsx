@@ -1,6 +1,8 @@
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useRouter } from 'next/router';
 import Head from "next/head";
 import Link from "next/link";
+import Navbar from "~/components/NavBar";
 
 import { api } from "~/utils/api";
 
@@ -8,20 +10,13 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>MQ</title>
+        <title>Melody Masters</title>
         <meta name="description" content="En webapp för musikquiz." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="hero min-h-screen flex items-center justify-center ">
-        <div className="container flex flex-col items-center gap-20 px-4 py-16 text-center">
-          <div className="flex flex-col items-center">
-          <h1 className="text-[clamp(4rem,17vw,6rem)] md:text-[clamp(4rem,8vw,6rem)] font-extrabold tracking-tight">
-            MQ
-          </h1>
-          <h2 className="text-body">
-           Quizet för dig som gillar musik (no shit) 
-          </h2>
-        </div>
+      <main className="flex flex-grow items-center justify-center">
+        <div className="container mx-auto p-4 text-center">
+          <Header />
           <AuthShowcase />
         </div>
       </main>
@@ -29,33 +24,43 @@ export default function Home() {
   );
 }
 
+function Header() {
+  return (
+    <header className="mb-10">
+      <h1 className="text-7xl font-extrabold tracking-tight md:text-7xl">Melody <br/> Masters</h1>
+      <p className="mt-3 text-lg md:text-xl">Quizet för musikälskaren</p>
+    </header>
+  );
+}
+
 function AuthShowcase() {
   const { data: sessionData } = useSession();
-
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined },
+    undefined,
+    {
+      enabled: sessionData?.user !== undefined,
+    },
   );
 
   return (
-    <div className="flex flex-col items-center justify-center gap-10 w-full">
-      {sessionData && (
-        <div className="absolute top-0 left-0 right-0 bg-primary p-4 text-center text-base-100">
-          Inloggad som {sessionData.user?.email}
-        </div>
-      )}
-      <div className="flex flex-col items-center justify-center gap-10">
-        {secretMessage && (
-          <Link className="btn btn-primary btn-wide" href="/quizmaster">
-            Gå vidare
+  
+    <div>
+
+      <div className="flex flex-col items-center justify-center gap-4">
+        {sessionData && (
+          <Link href="/quizmaster" className="btn btn-primary btn-wide">
+            Fortsätt
           </Link>
         )}
-        <button
-          className="btn btn-outline btn-primary btn-wide"
-          onClick={sessionData ? () => void signOut() : () => void signIn()}
-        >
-          {sessionData ? "Logga ut" : "Logga in"}
-        </button>
+        {!sessionData && (
+          <button
+            className="btn btn-primary btn-wide"
+            onClick={() => void signIn()}
+          >
+            Logga in
+          </button>
+        )}
+
       </div>
     </div>
   );

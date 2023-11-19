@@ -6,6 +6,7 @@ import QRCode from "react-qr-code";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
 import { type Question } from "@prisma/client";
+import GoBackButton from "~/components/GoBackButton";
 
 import {
   SkipToNext,
@@ -30,7 +31,14 @@ type Answer = {
   correct: boolean;
 };
 
+type Player = {
+  id: string;
+  name: string;
+  score: number;
+};
+
 interface UserJoin {
+  id: string;
   name: string;
 }
 
@@ -39,7 +47,7 @@ export default function Room() {
   const session = useSession();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [pusher, setPusher] = useState<Pusher | null>(null);
-  const [members, setMembers] = useState<string[]>([]);
+  const [members, setMembers] = useState<Player[]>([]);
   const [questions, setQuestions] = useState<SimpleQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState("waiting");
@@ -47,10 +55,19 @@ export default function Room() {
   const [showQuestion, setShowQuestion] = useState(false);
 
   const { data: questionData, isSuccess: gotQuestions } =
-    api.question.getSomeQuestions.useQuery();
+    api.question.getSomeQuestions.useQuery(undefined, {
+      enabled: questions.length === 0,
+    });
 
-  const addMemberToList = (name: string) => {
-    setMembers((prev) => [...prev, name]);
+  const addMemberToList = (id: string, name: string) => {
+    setMembers((prev) => [...prev, { id: id, name: name, score: 0 }]);
+  };
+
+  const getTopPlayers = () => {
+    if (members.length > 3) {
+      return members.sort((a, b) => b.score - a.score).slice(0, 3);
+    }
+    return members.sort((a, b) => b.score - a.score);
   };
 
   const sendStart = () => {
@@ -85,14 +102,40 @@ export default function Room() {
     });
 
     const channel = p.subscribe("game@" + router.query.slug?.toString());
+
+    // Listen for join events
     channel.bind("join", function (data: UserJoin) {
       try {
         const name = data.name;
-        if (name === undefined) {
+        const id = data.id;
+        if (name === undefined || id === undefined) {
           throw new Error("Player joined with undefined credentials");
         } else {
           console.log("Player joined with name " + name);
-          addMemberToList(name);
+          addMemberToList(id, name);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    });
+
+    // Listen for score events
+    channel.bind("score", function (data: { id: string; score: number }) {
+      try {
+        const id = data.id;
+        const score = data.score;
+        if (id === undefined || score === undefined) {
+          throw new Error("Player scored with undefined credentials");
+        } else {
+          setMembers((prev) =>
+            prev.map((p) => {
+              if (p.id === id) {
+                return { ...p, score: score };
+              } else {
+                return p;
+              }
+            }),
+          );
         }
       } catch (e) {
         console.log(e);
@@ -123,23 +166,26 @@ export default function Room() {
   };
 
   useEffect(() => {
-    const sendNext = (newIndex: number) => {
+    const sendNext = (nextQuestionIndex: number) => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
-      fetch(
-        "/api/room/" +
-          (router.query.slug.toString() ?? "no-room") +
-          "/new-question",
+      GenericBroadcast(
+        router.query.slug.toString() ?? "no-room",
+        "new-question",
         {
-          method: "POST",
-          body: JSON.stringify({ newQuestionIndex: newIndex }),
+          newQuestionIndex: nextQuestionIndex,
         },
-      )
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      );
+    };
+
+    // TODO: Implement this
+    const handleGameEnd = () => {
+      if (!router.query.slug || router.query.slug.at(0) === "") return;
+      GenericBroadcast(router.query.slug.toString() ?? "no-room", "end", {
+        topThree: [],
+      });
+      setPhase("results");
+      Pause();
+      void ClearQueueFull();
     };
 
     const interval = setInterval(() => {
@@ -160,9 +206,7 @@ export default function Room() {
             })
             .catch(() => console.log("Error skipping to next song"));
         } else {
-          setPhase("results");
-          Pause();
-          void ClearQueueFull();
+          handleGameEnd();
         }
       } else if (phase === "starting" && counter > 5) {
         setPhase("playing");
@@ -199,12 +243,9 @@ export default function Room() {
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
         onLoad={() => void tryAuthorize()}
       />
-      <div className="flex h-[100vh] flex-grow flex-col items-center">
-        <main className="mx-auto my-auto flex h-[50vh] w-4/5 flex-col items-center justify-between">
-          <h1 className="text-2xl font-extrabold tracking-tight text-base-content sm:text-[3rem]">
-            Quizroom
-          </h1>
-
+      <div className="flex flex-1 flex-col items-center">
+        <GoBackButton />
+        <main className="mx-auto my-auto flex h-[50vh] w-4/5 flex-col items-center justify-center">
           {phase === "results" && (
             <div className="my-12 flex h-full flex-col justify-start">
               <h1 className="mb-12 text-center text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
@@ -213,6 +254,16 @@ export default function Room() {
               <h2 className="text-center text-xl font-extrabold tracking-tight text-base-content sm:text-[2rem]">
                 Här kommer resultaten
               </h2>
+              <ul>
+                {getTopPlayers().map((user, index) => (
+                  <li
+                    key={index}
+                    className="text-center text-xl font-extrabold tracking-tight text-base-content sm:text-[2rem]"
+                  >
+                    {user.name} - {user.score}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
@@ -242,11 +293,18 @@ export default function Room() {
 
           {phase === "waiting" && (
             <>
-              <div className="mb-4 flex flex-col gap-5 text-center">
-                Room ID: {router.query.slug}
+              <div className="mb-8 flex flex-col items-center gap-3 text-center">
+                <div>
+                  <span className="text-xl font-bold ">
+                    RUM ID
+                  </span>
+                  <div className="text-3xl font-bold text-accent">
+                    {String(router.query.slug).toUpperCase()}
+                  </div>
+                </div>
                 {pusher != null ? (
-                  <div>
-                    <span>{pusher.connection.state}</span>
+                  <div className="flex flex-col items-center">
+                    {/* <span className="mb-2 text-sm text-gray-500">{pusher.connection.state}</span> */}
                     <QRCode
                       className="rounded-md bg-white p-2"
                       value={getURL()}
@@ -261,7 +319,7 @@ export default function Room() {
                   </button>
                 )}
                 <button
-                  className="btn btn-primary btn-wide mb-4"
+                  className="btn btn-primary btn-wide mt-4"
                   onClick={sendStart}
                 >
                   Starta
@@ -277,7 +335,7 @@ export default function Room() {
                   <h2 className="text-center text-2xl font-bold">Spelare</h2>
                   <ul className="text-base-content">
                     {members.map((member, index) => (
-                      <li key={index}>{member}</li>
+                      <li key={index}>{member.name}</li>
                     ))}
                   </ul>
                 </div>
@@ -288,6 +346,19 @@ export default function Room() {
       </div>
     </>
   );
+}
+
+function GenericBroadcast(roomId: string, action: string, body: unknown) {
+  fetch("/api/room/" + roomId + "/" + action, {
+    method: "POST",
+    body: JSON.stringify(body),
+  })
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 }
 
 interface CurrentQuestionInterface {
