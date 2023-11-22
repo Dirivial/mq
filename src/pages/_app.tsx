@@ -16,13 +16,13 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'night');
+    document.documentElement.setAttribute('data-theme', 'synthwave');
   }, []);
 
   return (
     <SessionProvider session={session}>
       <AuthContext.Provider value={{ session }}>
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col h-screen bg-base-200 ">
           <Navbar />
           <div className="flex flex-1"> 
             <Component {...pageProps} />

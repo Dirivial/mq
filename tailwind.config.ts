@@ -9,4 +9,4 @@ export default {
   daisyui: {
     themes: ["light", "dark", "night", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua"], 
   },
-} satisfies Config;
+}
