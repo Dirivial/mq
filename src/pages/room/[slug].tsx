@@ -152,7 +152,11 @@ export default function Room() {
   };
 
   const getURL = () => {
-    return env.NEXT_PUBLIC_URL + "/play/" + router.query.slug?.toString();
+    return (
+      env.NEXT_PUBLIC_URL +
+      "/play/" +
+      router.query.slug?.toString().toUpperCase()
+    );
   };
 
   useEffect(() => {
