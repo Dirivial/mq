@@ -76,6 +76,8 @@ model Question {
     id           Int        @id @unique @default(autoincrement())
     type         String
     text         String     @default("")
+    startTime    Int?       @default(0)
+    endTime      Int?       @default(0)
     content      String
     answer       String // Will there be questions where the user types in answer? If so, this should probably be an array
     falseAnswers String[]
