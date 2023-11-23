@@ -164,7 +164,7 @@ export default function Room() {
 
   useEffect(() => {
     if (gotQuiz && quizData?.questions && questions.length === 0) {
-      setQuestions(PrepareForQuiz(quizData.questions));
+      setQuestions(PrepareForQuiz(quizData.questions, quizData.questionsOrder));
     }
   }, [gotQuiz, quizData, questions]);
 
@@ -426,7 +426,10 @@ function ShowQuizStarting(props: QuizStartingInterface) {
   );
 }
 
-function PrepareForQuiz(questionData: Question[]): SimpleQuestion[] {
+function PrepareForQuiz(
+  questionData: Question[],
+  order: number[],
+): SimpleQuestion[] {
   const questions: SimpleQuestion[] = [];
 
   questionData.forEach((question) => {
@@ -445,6 +448,11 @@ function PrepareForQuiz(questionData: Question[]): SimpleQuestion[] {
       songId: question.content,
       answers: answers,
     });
+  });
+
+  // Sort questions in the order specified
+  questions.sort((a, b) => {
+    return order.indexOf(a.id) - order.indexOf(b.id);
   });
 
   ClearQueueFull()
