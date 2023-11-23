@@ -22,6 +22,7 @@ export const quizRouter = createTRPCRouter({
         name: z.string(),
         description: z.string(),
         questions: z.number().array(),
+        questionOrder: z.number().array(),
         gameModes: z.number().array(),
       }),
     )
@@ -33,12 +34,42 @@ export const quizRouter = createTRPCRouter({
           questions: {
             connect: input.questions.map((question) => ({ id: question })),
           },
+          questionsOrder: input.questionOrder,
           gameModes: input.gameModes,
           creator: {
             connect: {
               id: ctx.session.user.id,
             },
           },
+        },
+      });
+
+      return quiz;
+    }),
+
+  updateQuiz: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        name: z.string(),
+        description: z.string(),
+        questions: z.number().array(),
+        questionOrder: z.number().array(),
+        gameModes: z.number().array(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const quiz = await ctx.db.quiz.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+          description: input.description,
+          questions: {
+            connect: input.questions.map((question) => ({ id: question })),
+          },
+          gameModes: input.gameModes,
         },
       });
 
