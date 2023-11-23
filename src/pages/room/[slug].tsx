@@ -18,6 +18,7 @@ import {
 } from "~/utils/musicPlayer";
 import Head from "next/head";
 import Script from "next/script";
+import { useSearchParams } from "next/navigation";
 
 type SimpleQuestion = {
   id: number;
@@ -53,11 +54,16 @@ export default function Room() {
   const [phase, setPhase] = useState("waiting");
   const [counter, setCounter] = useState<number>(5);
   const [showQuestion, setShowQuestion] = useState(false);
+  const searchParams = useSearchParams();
 
-  const { data: questionData, isSuccess: gotQuestions } =
-    api.question.getSomeQuestions.useQuery(undefined, {
+  const { data: quizData, isSuccess: gotQuiz } = api.quiz.getQuiz.useQuery(
+    {
+      id: Number(searchParams.get("qid") ?? 1),
+    },
+    {
       enabled: questions.length === 0,
-    });
+    },
+  );
 
   const addMemberToList = (id: string, name: string) => {
     setMembers((prev) => [...prev, { id: id, name: name, score: 0 }]);
@@ -149,11 +155,18 @@ export default function Room() {
     return env.NEXT_PUBLIC_URL + "/play/" + router.query.slug?.toString();
   };
 
+  /*
   useEffect(() => {
     if (gotQuestions && questions.length === 0) {
       setQuestions(PrepareForQuiz(questionData));
     }
-  }, [questionData, gotQuestions, questions]);
+  }, [questionData, gotQuestions, questions]);*/
+
+  useEffect(() => {
+    if (gotQuiz && quizData?.questions && questions.length === 0) {
+      setQuestions(PrepareForQuiz(quizData.questions));
+    }
+  }, [gotQuiz, quizData, questions]);
 
   // Music kit authorization
   const tryAuthorize = async () => {
@@ -295,9 +308,7 @@ export default function Room() {
             <>
               <div className="mb-8 flex flex-col items-center gap-3 text-center">
                 <div>
-                  <span className="text-xl font-bold ">
-                    RUM ID
-                  </span>
+                  <span className="text-xl font-bold ">RUM ID</span>
                   <div className="text-3xl font-bold text-accent">
                     {String(router.query.slug).toUpperCase()}
                   </div>
