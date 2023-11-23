@@ -88,7 +88,7 @@ export default async function handler(
             console.log(e);
           });
       } else {
-        console.log("No action given");
+        console.log("No action given/unhandled action: " + slug?.at(1));
       }
     } catch (e) {
       console.log(e);
