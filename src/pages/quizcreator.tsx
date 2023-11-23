@@ -22,8 +22,8 @@ type QuizNameInputProps = {
 
 const QuizNameInput: React.FC<QuizNameInputProps> = ({ value, onChange, onNameSave }) => {
   return(
-    <div className="flex flex-auto card">
-      <div className="flex card-body items-center items-center justify-center">
+    <div className="flex w-fit h-fit md:w-fit bg-base-100 card">
+      <div className="flex card-body">
         <h2 className="card-title">Börja med att namnge ditt quiz!</h2>
         <input type="text" value={value} onChange={onChange} placeholder="Skriv namnet här" className="flex input input-bordered input-primary w-full max-w-xs" />
         <button className="btn btn-primary w-full max-w-xs" onClick={onNameSave}>Spara namn</button>
@@ -71,7 +71,7 @@ export default function QuizCreator() {
         <meta name="description" content="Nu är det dags för QUIZ!" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex flex-auto justify-center">
+      <main className="flex flex-auto flex-col p-10 justify-center items-center">
         <GoBackButton />
         {!isQuizNameSaved ? (
         <>
@@ -87,8 +87,15 @@ export default function QuizCreator() {
           ))}
           {/* You can add more components or logic here */}
         </div>
+        
       )}
-    </main>
+      <ul className="steps steps-horizontal w-full fixed bottom-20">
+            <li className="step step-primary">Namnge</li>
+            <li className="step ">Skapa frågor</li>
+            <li className="step">Kontrollera</li>
+            <li className="step">Spara</li>
+      </ul>
+      </main>
   </>
 );
 }

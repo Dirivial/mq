@@ -30,6 +30,58 @@ export default function QuizMaster() {
       });
   };
 
+  const CreateQuizCard = () => {
+    return(
+    <div className="card card-compact w-80 bg-base-100 shadow-xl">
+      <figure><img src="quizcard.png" alt="Shoes" /></figure>
+      <div className="flex card-body items-center items-center justify-center">
+        <h2 className="flex card-title">Skapa ett helt eget quiz!</h2>
+        <p>Skräddarsay den ultimata quizupplevelsen.</p>
+        <button className="btn btn-primary w-full max-w-xs" onClick={createQuiz}>QuizMaker</button>
+      </div>
+    </div>
+    );
+  };
+
+  const OpenRoomCard = () => {
+    return(
+    <div className="card card-compact w-80 bg-base-100 shadow-xl text-center">
+      <figure><img src="quizroom.png" alt="Shoes" /></figure>
+      <div className="flex card-body items-center items-center justify-center">
+        <h2 className="flex card-title">Öppna ett rum Quizrum!</h2>
+        <p>Öppna ett rum, välj ett quiz och låt folk joina.</p>
+        <button className="btn btn-primary w-full max-w-xs" onClick={openRoom}>Quizroom</button>
+      </div>
+    </div>
+    );
+  };
+
+  const UserQuizzesList = () => {
+    const quizzes = [
+      { id: 1, title: '80-talsmusik Quiz' },
+      { id: 2, title: 'Rockmusikens Historia' },
+      { id: 2, title: 'Rockmusikens Historia' },
+
+      // Lägg till fler quizzes här
+    ];
+  
+    return (
+      <div className="prose overflow-x-auto flex items-center flex-col pt-10">
+        <h2>Mina skapade quiz</h2>
+        <div className="flex flex-col items-center gap-4">
+          {quizzes.map((quiz) => (
+            <div key={quiz.id} className="card card-compact w-96 bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h5 className="card-title">{quiz.title}</h5>
+                <button className="btn btn-secondary">Visa Quiz</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   interface ActionButtonProps {
     onClick: () => void;
     label: string;
@@ -68,28 +120,20 @@ export default function QuizMaster() {
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
         onLoad={() => void tryAuthorize()} // Assuming tryAuthorize is defined elsewhere
       />
-      <main className="flex flex-1 items-center justify-center">
-        <div className="container mx-auto p-4 text-center">
+      <main className="flex flex-auto flex-col items-center justify-center">
 
-          <div className="flex flex-col items-center gap-4">
-            <ActionButton onClick={createQuiz} label="Skapa Quiz" />
-            <ActionButton onClick={openRoom} label="Öppna ett Rum" />
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <CreateQuizCard/>
+            <OpenRoomCard></OpenRoomCard>
             {!isAuthorized && (
               <ActionButton
                 onClick={() => void tryAuthorize()}
                 label="Anslut till Apple Music"
               />
             )}
-            {/*<div className="my-4 w-full">
-              <div className="divider"></div>
-            </div>*/}
-            {/*<ActionButton
-              onClick={() => void signOut()}
-              label="Logga ut"
-              outline
-            />*/}
           </div>
-        </div>
+          <UserQuizzesList />
+
       </main>
     </>
   );
