@@ -48,7 +48,7 @@ export default async function handler(
         const body = UserJoinSchema.parse(rawData);
 
         await pusher
-          .trigger("game@" + slug?.at(0)?.toString(), "join", {
+          .trigger("game@" + slug?.at(0)?.toString().toUpperCase(), "join", {
             id: body.id,
             name: body.name,
           })
