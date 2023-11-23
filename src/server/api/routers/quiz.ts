@@ -47,6 +47,24 @@ export const quizRouter = createTRPCRouter({
       return quiz;
     }),
 
+  getQuizzesByUser: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.quiz.findMany({
+        where: {
+          creatorId: input.id,
+        },
+      });
+    }),
+
+  getQuizzesByMe: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.quiz.findMany({
+      where: {
+        creatorId: ctx.session.user.id,
+      },
+    });
+  }),
+
   updateQuiz: protectedProcedure
     .input(
       z.object({
