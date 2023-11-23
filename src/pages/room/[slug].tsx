@@ -155,13 +155,6 @@ export default function Room() {
     return env.NEXT_PUBLIC_URL + "/play/" + router.query.slug?.toString();
   };
 
-  /*
-  useEffect(() => {
-    if (gotQuestions && questions.length === 0) {
-      setQuestions(PrepareForQuiz(questionData));
-    }
-  }, [questionData, gotQuestions, questions]);*/
-
   useEffect(() => {
     if (gotQuiz && quizData?.questions && questions.length === 0) {
       setQuestions(PrepareForQuiz(quizData.questions, quizData.questionsOrder));
