@@ -1,11 +1,13 @@
 import Head from "next/head";
 import { signOut } from "next-auth/react";
-import { env } from "~/env.mjs"
+import { env } from "~/env.mjs";
 import { useRouter } from "next/navigation";
 import { ConfigureMusicKit } from "~/utils/musicPlayer";
 import Script from "next/script";
 import { useState } from "react";
 import Navbar from "~/components/NavBar";
+
+const qid = 1;
 
 export default function QuizMaster() {
   const router = useRouter();
@@ -18,7 +20,7 @@ export default function QuizMaster() {
   const openRoom = () => {
     const roomId = Math.random().toString(36).substring(7);
     console.log("Opening a new room with id " + roomId + "...");
-    router.push("/room/" + roomId);
+    router.push("/room/" + roomId + "?qid=" + qid);
   };
 
   const tryAuthorize = async () => {
@@ -70,7 +72,6 @@ export default function QuizMaster() {
       />
       <main className="flex flex-1 items-center justify-center">
         <div className="container mx-auto p-4 text-center">
-
           <div className="flex flex-col items-center gap-4">
             <ActionButton onClick={createQuiz} label="Skapa Quiz" />
             <ActionButton onClick={openRoom} label="Öppna ett Rum" />
