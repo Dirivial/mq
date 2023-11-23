@@ -83,7 +83,9 @@ export default function Room() {
       questions.map((q) => q.id),
     );
     fetch(
-      "/api/room/" + (router.query.slug.toString() ?? "no-room") + "/start",
+      "/api/room/" +
+        (router.query.slug.toString().toUpperCase() ?? "no-room") +
+        "/start",
       {
         method: "POST",
         body: JSON.stringify({ questionIds: questions.map((q) => q.id) }),
@@ -107,7 +109,9 @@ export default function Room() {
       cluster: "eu",
     });
 
-    const channel = p.subscribe("game@" + router.query.slug?.toString());
+    const channel = p.subscribe(
+      "game@" + router.query.slug?.toString().toUpperCase(),
+    );
 
     // Listen for join events
     channel.bind("join", function (data: UserJoin) {
@@ -179,7 +183,7 @@ export default function Room() {
     const sendNext = (nextQuestionIndex: number) => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
       GenericBroadcast(
-        router.query.slug.toString() ?? "no-room",
+        router.query.slug.toString().toUpperCase() ?? "no-room",
         "new-question",
         {
           newQuestionIndex: nextQuestionIndex,
@@ -190,9 +194,13 @@ export default function Room() {
     // TODO: Implement this
     const handleGameEnd = () => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
-      GenericBroadcast(router.query.slug.toString() ?? "no-room", "end", {
-        topThree: [],
-      });
+      GenericBroadcast(
+        router.query.slug.toString().toUpperCase() ?? "no-room",
+        "end",
+        {
+          topThree: [],
+        },
+      );
       setPhase("results");
       Pause();
       void ClearQueueFull();
