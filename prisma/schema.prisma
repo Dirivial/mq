@@ -42,14 +42,15 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    role          String    @default("user")
+    id             String    @id @default(cuid())
+    name           String?
+    email          String?   @unique
+    emailVerified  DateTime?
+    image          String?
+    accounts       Account[]
+    sessions       Session[]
+    role           String    @default("user")
+    CreatedQuizzes Quiz[]
 }
 
 model VerificationToken {
@@ -61,11 +62,14 @@ model VerificationToken {
 }
 
 model Quiz {
-    id          Int        @id @unique @default(autoincrement())
-    name        String
-    description String
-    gameModes   Int[] // This could reasonably be an enum or json
-    questions   Question[]
+    id             Int        @id @unique @default(autoincrement())
+    name           String
+    description    String
+    gameModes      Int[] // This could reasonably be an enum or json
+    questions      Question[]
+    questionsOrder Int[]
+    creator        User?      @relation(fields: [creatorId], references: [id])
+    creatorId      String?
 }
 
 model Question {
