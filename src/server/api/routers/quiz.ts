@@ -2,13 +2,16 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
-export const questionRouter = createTRPCRouter({
+export const quizRouter = createTRPCRouter({
   getQuiz: protectedProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ ctx, input }) => {
       return await ctx.db.quiz.findUnique({
         where: {
           id: input.id,
+        },
+        include: {
+          questions: true,
         },
       });
     }),
@@ -31,6 +34,11 @@ export const questionRouter = createTRPCRouter({
             connect: input.questions.map((question) => ({ id: question })),
           },
           gameModes: input.gameModes,
+          creator: {
+            connect: {
+              id: ctx.session.user.id,
+            },
+          },
         },
       });
 
