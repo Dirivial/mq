@@ -24,7 +24,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <AuthContext.Provider value={{ session }}>
         <div className="flex flex-col min-h-screen bg-base-200">
           <Navbar />
-          <div className="flex flex-grow p-10"> 
+          <div className="flex flex-grow p-5"> 
             <Component {...pageProps} />
           </div>
           <Footer />

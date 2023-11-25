@@ -2,23 +2,11 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import GoBackButton from "~/components/GoBackButton";
+import { Question, Quiz, QuizNameInputProps, QuizFormInputProps } from "~/utils/types";
+import QuestionForm from "~/components/QuestionForm";
 
-type Question = {
-  name: string;
-  songId: string;
-  answers: { text: string; correct: boolean }[];
-};
 
-type Quiz = {
-  name: string;
-  questions: Question[];
-};
 
-type QuizNameInputProps = {
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onNameSave: () => void;
-};
 
 const QuizNameInput: React.FC<QuizNameInputProps> = ({ value, onChange, onNameSave }) => {
   return(
@@ -32,12 +20,6 @@ const QuizNameInput: React.FC<QuizNameInputProps> = ({ value, onChange, onNameSa
   );
 };
 
-
-
-const QuestionForm: React.FC<{ onSave: (question: Question) => void }> = ({ onSave }) => {
-  // Implement the form here
-  return <div>*Question form*</div>;
-};
 
 export default function QuizCreator() {
   const [quizName, setQuizName] = useState<string>('');
@@ -55,12 +37,18 @@ export default function QuizCreator() {
   };
 
   const handleQuestionSave = (newQuestion: Question) => {
+    console.log(newQuestion);
     setQuestions([...questions, newQuestion]);
   };
 
   const handleQuizSave = () => {
     const newQuiz: Quiz = { name: quizName, questions };
     // Code to save the entire quiz
+    console.log(newQuiz);
+  };
+
+  const handleQuizCancel = () => {
+    const newQuiz: Quiz = { name: quizName, questions };
     console.log(newQuiz);
   };
 
@@ -71,30 +59,28 @@ export default function QuizCreator() {
         <meta name="description" content="Nu är det dags för QUIZ!" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex flex-auto flex-col p-10 justify-center items-center">
+      <main className="flex flex-auto flex-col">
         <GoBackButton />
-        {!isQuizNameSaved ? (
-        <>
-          <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
-        </>
-      ) : (
-        <div>
-          {/* The component or message you want to show after the quiz is saved */}
-          <QuestionForm onSave={handleQuestionSave} />
-          <button className="btn btn-primary" onClick={handleQuizSave}>Spara Quiz</button>
-          {questions.map((question, index) => (
-            <div key={index}>Question {index + 1}: {question.name}</div>
-          ))}
-          {/* You can add more components or logic here */}
+        <div className="flex h-full w-full items-center justify-center">
+          {!isQuizNameSaved ? (
+          <>
+            <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
+          </>
+          ) : (
+          <div>
+            <QuestionForm onQuestionSave={handleQuestionSave} quizName={quizName} onQuizSave={handleQuizSave} onQuizCancel={handleQuizCancel}/>
+            {questions.map((question, index) => (
+              <div key={index}>Question {index + 1}: {question.name}</div>
+            ))}
+          </div>
+          )}
         </div>
-        
-      )}
-      <ul className="steps steps-horizontal w-full fixed bottom-20">
-            <li className="step step-primary">Namnge</li>
-            <li className="step ">Skapa frågor</li>
-            <li className="step">Kontrollera</li>
-            <li className="step">Spara</li>
-      </ul>
+        <ul className="steps steps-horizontal w-full mt-auto pb-2">
+              <li className="step step-primary">Namnge</li>
+              <li className="step ">Skapa frågor</li>
+              <li className="step">Kontrollera</li>
+              <li className="step">Spara</li>
+        </ul>
       </main>
   </>
 );
