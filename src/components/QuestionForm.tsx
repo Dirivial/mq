@@ -35,25 +35,36 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onQuestionSave, quizName, o
     });
   };
 
-  const AnswerInputs = () => {
-    return [answer1, answer2, answer3, answer4].map((answer, index) => (
-      <div className="flex items-center" key={index}>
-        <input
-          type="text"
-          value={answer.text}
-          onChange={(e) => handleAnswerChange(e.target.value, index)}
-          placeholder={`Alternativ ${index + 1}`}
-          className="input input-bordered input-primary flex-1 mr-2"
-        />
-        <input
-          type="radio"
-          name="correctAnswer"
-          checked={correctAnswer === index}
-          onChange={() => handleRadioChange(index)}
-        />
-      </div>
-    ));
+  const SelectCorrectAnswer = () => {
+    const options = ["1", "2", "3", "4"];
+    return (
+      <select className="select select-primary w-full">
+        <option disabled selected>Välj det korrekta svaret</option>
+        {options.map((option, index) => (
+          <option key={index}>Svarsalternativ {option}</option>
+        ))}
+      </select>
+    );
   }
+
+  const AnswerInputs = () => {
+    return (
+      <div className="grid grid-cols-2 gap-4"> {/* Grid container for 2x2 layout */}
+        {[answer1, answer2, answer3, answer4].map((answer, index) => (
+          <div className="flex items-center" key={index}>
+            <input
+              value={answer.text}
+              onChange={(e) => handleAnswerChange(e.target.value, index)}
+              placeholder={`Alternativ ${index + 1}`}
+              className="flex input input-bordered input-primary flex-1 mr-2"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+
 
 
   return (
@@ -73,9 +84,11 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onQuestionSave, quizName, o
                 className="input input-bordered input-primary w-full max-w-xs mt-0 mb-5" 
                 />
                 <AnswerInputs/>
-                <button className="btn btn-primary w-full max-w-xs mt-5" onClick={saveQuestion}>Lägg till fråga</button>
+                <SelectCorrectAnswer/>
         </div>
       </div>
+
+      <button className="btn btn-primary w-full mt-5" onClick={saveQuestion}>Lägg till fråga</button>
       <div className='flex pt-5'>
         <button className="flex flex-grow btn btn-primary" onClick={onQuizSave}>Avsluta <br/> & Spara</button>
         <div className="divider divider-horizontal"></div>
