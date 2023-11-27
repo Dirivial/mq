@@ -62,18 +62,17 @@ export default function QuizCreator() {
       <main className="flex flex-auto flex-col">
         <GoBackButton />
         <div className="flex h-full w-full items-center justify-center">
-          {!isQuizNameSaved ? (
-          <>
-            <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
-          </>
-          ) : (
-          <div>
-            <QuestionForm onQuestionSave={handleQuestionSave} quizName={quizName} onQuizSave={handleQuizSave} onQuizCancel={handleQuizCancel}/>
-            {questions.map((question, index) => (
-              <div key={index}>Question {index + 1}: {question.name}</div>
-            ))}
-          </div>
-          )}
+          {!isQuizNameSaved 
+          ? <>
+             <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
+            </>
+          : <div>
+              <QuestionForm onQuestionSave={handleQuestionSave} quizName={quizName} onQuizSave={handleQuizSave} onQuizCancel={handleQuizCancel}/>
+              {questions.map((question, index) => (
+                <div key={index}>Question {index + 1}: {question.name}</div>
+              ))}
+            </div>
+          }
         </div>
         <ul className="steps steps-horizontal w-full mt-auto pb-2">
               <li className="step step-primary">Namnge</li>

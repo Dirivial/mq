@@ -28,3 +28,8 @@ export type QuestionFormProps = {
   onQuizSave: () => void;
   onQuizCancel: () => void;
 };
+
+export type Answer = {
+  text: string;
+  correct: boolean;
+};
