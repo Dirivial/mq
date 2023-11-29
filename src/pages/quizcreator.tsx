@@ -20,11 +20,49 @@ const QuizNameInput: React.FC<QuizNameInputProps> = ({ value, onChange, onNameSa
   );
 };
 
+const QuestionSidebar: React.FC<{
+  questions: Question[];
+  onSelectQuestion: (index: number) => void;
+}> = ({ questions, onSelectQuestion }) => {
+  return (
+    <div className="overflow-x-auto">
+      <table className="table w-full">
+        {/* head */}
+        <thead>
+          <tr>
+            <th>Nr</th>
+            <th>Fråga</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* rows */}
+          {questions.map((question, index) => (
+            <tr key={index} className={index % 2 === 0 ? "bg-base-200" : ""}>
+              <th>{index + 1}</th>
+              <td>{question.name}</td>
+              <td>
+                <button 
+                  className="btn btn-ghost btn-xs"
+                  onClick={() => onSelectQuestion(index)}>
+                  Edit
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+
 
 export default function QuizCreator() {
   const [quizName, setQuizName] = useState<string>('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isQuizNameSaved, setIsQuizNameSaved] = useState<boolean>(false);
+  const [selectedQuestionIndex, setSelectedQuestionIndex] = useState<number | null>(null);
 
 
   const handleQuizNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +90,12 @@ export default function QuizCreator() {
     console.log(newQuiz);
   };
 
+  const handleSelectQuestion = (index: number) => {
+    setSelectedQuestionIndex(index);
+    // Logic to load the selected question for editing
+    // For example, you might want to set the form state to the selected question's data
+  };
+
   return (
     <>
       <Head>
@@ -59,28 +103,32 @@ export default function QuizCreator() {
         <meta name="description" content="Nu är det dags för QUIZ!" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex flex-auto flex-col">
+      <main className="flex flex-auto flex-row justify-center items-center">
         <GoBackButton />
-        <div className="flex h-full w-full items-center justify-center">
-          {!isQuizNameSaved 
-          ? <>
-             <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
-            </>
-          : <div>
-              <QuestionForm onQuestionSave={handleQuestionSave} quizName={quizName} onQuizSave={handleQuizSave} onQuizCancel={handleQuizCancel}/>
-              {questions.map((question, index) => (
-                <div key={index}>Question {index + 1}: {question.name}</div>
-              ))}
-            </div>
-          }
+        <div className="flex h-full w-full justify-center gap-5">placeholder</div>
+        <div className="flex h-full w-full justify-center gap-5">
+          <div className="flex">
+            {!isQuizNameSaved 
+              ? <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
+              : <QuestionForm 
+                  onQuestionSave={handleQuestionSave} 
+                  quizName={quizName} 
+                  onQuizSave={handleQuizSave} 
+                  onQuizCancel={handleQuizCancel}
+                />
+            }
+          </div>
         </div>
-        <ul className="steps steps-horizontal w-full mt-auto pb-2">
-              <li className="step step-primary">Namnge</li>
-              <li className="step ">Skapa frågor</li>
-              <li className="step">Kontrollera</li>
-              <li className="step">Spara</li>
-        </ul>
+        <div className="flex h-full w-full justify-center gap-5">
+          {isQuizNameSaved && questions.length > 0 && (
+              <QuestionSidebar 
+                questions={questions} 
+                onSelectQuestion={handleSelectQuestion} 
+              />
+            )}
+        </div>
+
       </main>
-  </>
-);
+    </>
+  );
 }
