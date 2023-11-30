@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { ConfigureMusicKit } from "~/utils/musicPlayer";
 import Script from "next/script";
 import { useState } from "react";
-import Image from "next/image";
 
 export default function QuizMaster() {
   const router = useRouter();
@@ -32,7 +31,7 @@ export default function QuizMaster() {
   const CreateQuizCard = () => {
     return(
     <div className="card card-compact w-80 bg-base-100 shadow-xl">
-      <figure><Image src="quizcard.png" alt="Shoes" /></figure>
+      <figure><img src="quizcard.png" alt="Shoes"/></figure>
       <div className="flex card-body items-center items-center justify-center">
         <h2 className="flex card-title">Skapa ett helt eget quiz!</h2>
         <p>Skräddarsay den ultimata quizupplevelsen.</p>
@@ -45,7 +44,7 @@ export default function QuizMaster() {
   const OpenRoomCard = () => {
     return(
     <div className="card card-compact w-80 bg-base-100 shadow-xl text-center">
-      <figure><Image src="quizroom.png" alt="Shoes" /></figure>
+      <figure><img src="quizroom.png" alt="Shoes" /></figure>
       <div className="flex card-body items-center items-center justify-center">
         <h2 className="flex card-title">Öppna ett rum Quizrum!</h2>
         <p>Öppna ett rum, välj ett quiz och låt folk joina.</p>
@@ -59,7 +58,7 @@ export default function QuizMaster() {
     const quizzes = [
       { id: 1, title: '80-talsmusik Quiz' },
       { id: 2, title: 'Rockmusikens Historia' },
-      { id: 2, title: 'Rockmusikens Historia' },
+      { id: 3, title: 'Rockmusikens Historia' },
 
       // Lägg till fler quizzes här
     ];

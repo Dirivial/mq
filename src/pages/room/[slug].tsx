@@ -6,7 +6,7 @@ import QRCode from "react-qr-code";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
 import { type Question } from "@prisma/client";
-import GoBackButton from "~/components/GoBackButton";
+import GoBackButton from "~/components/layout/GoBackButton";
 
 import {
   SkipToNext,

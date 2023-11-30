@@ -162,9 +162,9 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   };
 
   return (
-    <div className='flex flex-col'>
-      <div className="prose flex h-fit bg-base-100 card">
-        <div className="flex card-body items-center">
+    <div className='flex flex-col w-1/2 h-fit'>
+      <div className="flex flex-auto bg-base-100 card ">
+        <div className="flex w-full card-body items-center">
           <div className='flex flex-col text-center'>
             <h1 className='-mb-3'>{String(quizName).toUpperCase()}</h1>
             <p className='mt-0 mb-0 opacity-50'>quizets namn</p>
