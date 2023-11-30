@@ -112,6 +112,7 @@ export default function QuizCreator() {
   const [questionName, setQuestionName] = useState('');
   const [answers, setAnswers] = useState(Array.from({ length: 4 }, () => ({ text: '', correct: false })));
   const [correctAnswer, setCorrectAnswer] = useState(-1);
+  console.log(selectedQuestionIndex);
 
   // Handlers for QuestionForm
   const handleAnswerChange = (text : string, index: number) => {
