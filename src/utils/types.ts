@@ -23,10 +23,16 @@ export type QuizFormInputProps = {
 };
 
 export type QuestionFormProps = {
+  questionName: string;
   onQuestionSave: (newQuestion: Question) => void;
   quizName: string;
   onQuizSave: () => void;
   onQuizCancel: () => void;
+  onQuestionNameChange: (name : string) => void;
+  answers: { text: string; correct: boolean }[];
+  onAnswerChange: (answer: string, index: number) => void;
+  correctAnswer: number;
+  onCorrectAnswerChange: (index: number) => void;
 };
 
 export type Answer = {

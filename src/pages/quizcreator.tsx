@@ -63,7 +63,21 @@ export default function QuizCreator() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isQuizNameSaved, setIsQuizNameSaved] = useState<boolean>(false);
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState<number | null>(null);
+    // Moved from QuestionForm
+  const [questionName, setQuestionName] = useState('');
+  const [answers, setAnswers] = useState(Array.from({ length: 4 }, () => ({ text: '', correct: false })));
+  const [correctAnswer, setCorrectAnswer] = useState(-1);
 
+  // Handlers for QuestionForm
+  const handleAnswerChange = (text : string, index: number) => {
+    console.log(text, index);
+    // ... logic to update answers
+  };
+
+  const handleCorrectAnswerChange = (index : number) => {
+    console.log(index);
+    // ... logic to update correct answer
+  };
 
   const handleQuizNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value);
@@ -105,17 +119,23 @@ export default function QuizCreator() {
       </Head>
       <main className="flex flex-auto flex-row justify-center items-center">
         <GoBackButton />
-        <div className="flex h-full w-full justify-center gap-5">placeholder</div>
+        <div className="flex h-full w-full justify-center gap-5"></div>
         <div className="flex h-full w-full justify-center gap-5">
           <div className="flex">
             {!isQuizNameSaved 
               ? <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
-              : <QuestionForm 
-                  onQuestionSave={handleQuestionSave} 
-                  quizName={quizName} 
-                  onQuizSave={handleQuizSave} 
-                  onQuizCancel={handleQuizCancel}
-                />
+              :     <QuestionForm 
+                      onQuestionSave={handleQuestionSave} 
+                      quizName={quizName} 
+                      onQuizSave={handleQuizSave} 
+                      onQuizCancel={handleQuizCancel}
+                      questionName={questionName}
+                      onQuestionNameChange={setQuestionName}
+                      answers={answers}
+                      onAnswerChange={handleAnswerChange}
+                      correctAnswer={correctAnswer}
+                      onCorrectAnswerChange={handleCorrectAnswerChange}
+                      />
             }
           </div>
         </div>

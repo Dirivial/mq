@@ -136,34 +136,28 @@ AnswerInput.displayName = 'AnswerInput';
 SelectSong.displayName = 'SelectSong'; 
 NameQuestion.displayName = 'NameQuestion';
 
-const QuestionForm: React.FC<QuestionFormProps> = ({ onQuestionSave, quizName, onQuizSave, onQuizCancel }) => {
-  const [questionName, setQuestionName] = useState('');
-  const [answers, setAnswers] = useState<Answer[]>(Array.from({ length: 4 }, () => ({ text: '', correct: false })));
-  const [correctAnswer, setCorrectAnswer] = useState(-1);
-
-  const handleAnswerChange = (text: string, index: number) => {
-    const newAnswers = answers.map((answer, idx) => ({
-      ...answer,
-      text: idx === index ? text : answer.text
-    }));
-    setAnswers(newAnswers);
-  };
-
-  const handleCorrectAnswerChange = (index: number) => {
-    setCorrectAnswer(index);
-    const newAnswers = answers.map((answer, idx) => ({
-      ...answer,
-      correct: idx === index
-    }));
-    setAnswers(newAnswers);
-  };
+const QuestionForm: React.FC<QuestionFormProps> = ({ 
+  onQuestionSave, 
+  quizName, 
+  onQuizSave, 
+  onQuizCancel,
+  questionName,
+  onQuestionNameChange,
+  answers,
+  onAnswerChange,
+  correctAnswer,
+  onCorrectAnswerChange,
+ }) => {
 
   const saveQuestion = () => {
+    // Construct the new question object
     const newQuestion: Question = {
       name: questionName,
-      songId: '', 
+      songId: '', // Assuming you have a way to set this
       answers: answers,
     };
+    
+    // Call the passed onQuestionSave function with the new question
     onQuestionSave(newQuestion);
   };
 
@@ -176,11 +170,11 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onQuestionSave, quizName, o
             <p className='mt-0 mb-0 opacity-50'>quizets namn</p>
           </div>
           <div className='flex flex-col w-full gap-2'>
-            <NameQuestion value={questionName} onChange={setQuestionName} />
+            <NameQuestion value={questionName} onChange={onQuestionNameChange} />
             <SelectSong />
           </div>
-          <AnswerInputs answers={answers} onAnswerChange={handleAnswerChange} />
-          <SelectCorrectAnswer answers={answers} correctAnswer={correctAnswer} onCorrectAnswerChange={handleCorrectAnswerChange} />
+          <AnswerInputs answers={answers} onAnswerChange={onAnswerChange} />
+          <SelectCorrectAnswer answers={answers} correctAnswer={correctAnswer} onCorrectAnswerChange={onCorrectAnswerChange} />
         </div>
       </div>
       <button className="btn btn-primary w-full mt-5" onClick={saveQuestion}>Lägg till fråga</button>
