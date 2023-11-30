@@ -1,8 +1,8 @@
 import Head from "next/head";
-import Link from "next/link";
+//import Link from "next/link";
 import { useState } from "react";
 import GoBackButton from "~/components/GoBackButton";
-import { Question, Quiz, QuizNameInputProps, QuizFormInputProps } from "~/utils/types";
+import type { Question, Quiz, QuizNameInputProps,} from "~/utils/types";
 import QuestionForm from "~/components/QuestionForm";
 
 
@@ -20,41 +20,87 @@ const QuizNameInput: React.FC<QuizNameInputProps> = ({ value, onChange, onNameSa
   );
 };
 
+const QuestionDetail: React.FC<{ question: Question }> = ({ question }) => {
+  return (
+    <div>
+      <p><strong>Fråga:</strong> {question.name}</p>
+      <ul>
+        {question.answers.map((answer, index) => (
+          <li key={index} className={answer.correct ? "text-green-500" : ""}>
+            {answer.text} {answer.correct ? "(Korrekt)" : ""}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const QuestionSidebar: React.FC<{
   questions: Question[];
   onSelectQuestion: (index: number) => void;
 }> = ({ questions, onSelectQuestion }) => {
+  const [selectedQuestionDetail, setSelectedQuestionDetail] = useState<number | null>(null);
+
+  const showQuestionDetail = (index: number) => {
+    if (index >= 0 && index < questions.length) {
+      setSelectedQuestionDetail(index);
+    }
+  };
+
+  const closeQuestionDetail = () => {
+    setSelectedQuestionDetail(null);
+  };
+
+  const selectedQuestion = selectedQuestionDetail !== null ? questions[selectedQuestionDetail] : undefined;
+
   return (
-    <div className="overflow-x-auto">
-      <table className="table w-full">
-        {/* head */}
+    <div className="overflow-x-auto bg-base-300 card">
+      <table className="table w-full bg-black">
         <thead>
           <tr>
             <th>Nr</th>
             <th>Fråga</th>
+            <th>Låt</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {/* rows */}
           {questions.map((question, index) => (
             <tr key={index} className={index % 2 === 0 ? "bg-base-200" : ""}>
               <th>{index + 1}</th>
-              <td>{question.name}</td>
+              <td>
+                <button 
+                  className="btn btn-ghost btn-xs"
+                  onClick={() => showQuestionDetail(index)}>
+                  {question.name}
+                </button>
+              </td>
+              <td>***</td>
               <td>
                 <button 
                   className="btn btn-ghost btn-xs"
                   onClick={() => onSelectQuestion(index)}>
-                  Edit
+                  Redigera
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {selectedQuestion && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <QuestionDetail question={selectedQuestion} />
+            <div className="modal-action">
+              <button className="btn btn-primary" onClick={closeQuestionDetail}>Stäng</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 
 
@@ -63,20 +109,27 @@ export default function QuizCreator() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isQuizNameSaved, setIsQuizNameSaved] = useState<boolean>(false);
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState<number | null>(null);
-    // Moved from QuestionForm
   const [questionName, setQuestionName] = useState('');
   const [answers, setAnswers] = useState(Array.from({ length: 4 }, () => ({ text: '', correct: false })));
   const [correctAnswer, setCorrectAnswer] = useState(-1);
 
   // Handlers for QuestionForm
   const handleAnswerChange = (text : string, index: number) => {
-    console.log(text, index);
-    // ... logic to update answers
+    setAnswers(answers => answers.map((answer, idx) => {
+      if (idx === index) {
+        return { ...answer, text: text };
+      } else {
+        return answer;
+      }
+    }));
   };
-
-  const handleCorrectAnswerChange = (index : number) => {
-    console.log(index);
-    // ... logic to update correct answer
+  
+  const handleCorrectAnswerChange = (index: number) => {
+    setCorrectAnswer(index);
+    setAnswers(answers => answers.map((answer, idx) => ({
+      ...answer,
+      correct: idx === index
+    })));
   };
 
   const handleQuizNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,8 +172,8 @@ export default function QuizCreator() {
       </Head>
       <main className="flex flex-auto flex-row justify-center items-center">
         <GoBackButton />
-        <div className="flex h-full w-full justify-center gap-5"></div>
-        <div className="flex h-full w-full justify-center gap-5">
+        <div className="flex h-full w-1/4 justify-center gap-5"></div>
+        <div className="flex h-full w-1/2 justify-center gap-5">
           <div className="flex">
             {!isQuizNameSaved 
               ? <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
@@ -139,7 +192,7 @@ export default function QuizCreator() {
             }
           </div>
         </div>
-        <div className="flex h-full w-full justify-center gap-5">
+        <div className="flex h-full w-1/4 justify-center gap-5">
           {isQuizNameSaved && questions.length > 0 && (
               <QuestionSidebar 
                 questions={questions} 
