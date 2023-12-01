@@ -63,7 +63,9 @@ export default function Play() {
       cluster: "eu",
     });
 
-    const channel = p.subscribe("game@" + router.query.slug?.toString());
+    const channel = p.subscribe(
+      "game@" + router.query.slug?.toString().toUpperCase(),
+    );
 
     // Handle game start
     channel.bind("start", function (data: GameStart) {
