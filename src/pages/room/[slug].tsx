@@ -456,9 +456,11 @@ function PrepareForQuiz(
   });
 
   // Sort questions in the order specified
+  console.log(order);
+  /*
   questions.sort((a, b) => {
     return order.indexOf(a.id) - order.indexOf(b.id);
-  });
+  });*/
 
   ClearQueueFull()
     .then(() => {
