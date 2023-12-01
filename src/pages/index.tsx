@@ -2,7 +2,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from 'next/router';
 import Head from "next/head";
 import Link from "next/link";
-import Navbar from "~/components/NavBar";
+import Navbar from "~/components/layout/NavBar";
 
 import { api } from "~/utils/api";
 

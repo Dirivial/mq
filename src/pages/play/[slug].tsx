@@ -4,7 +4,7 @@ import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
-import GoBackButton from "~/components/GoBackButton";
+import GoBackButton from "~/components/layout/GoBackButton";
 
 interface GameStart {
   questionIds: number[];
