@@ -5,6 +5,8 @@ import { ConfigureMusicKit } from "~/utils/musicPlayer";
 import Script from "next/script";
 import { useState } from "react";
 
+const qid = 1;
+
 export default function QuizMaster() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(true);
@@ -16,7 +18,7 @@ export default function QuizMaster() {
   const openRoom = () => {
     const roomId = Math.random().toString(36).substring(7);
     console.log("Opening a new room with id " + roomId + "...");
-    router.push("/room/" + roomId);
+    router.push("/room/" + roomId + "?qid=" + qid);
   };
 
   const tryAuthorize = async () => {
@@ -122,7 +124,6 @@ export default function QuizMaster() {
 
           <div className="flex flex-col md:flex-row items-center gap-4">
             <CreateQuizCard/>
-            <OpenRoomCard></OpenRoomCard>
             {!isAuthorized && (
               <ActionButton
                 onClick={() => void tryAuthorize()}

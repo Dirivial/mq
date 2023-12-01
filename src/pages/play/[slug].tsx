@@ -117,13 +117,18 @@ export default function Play() {
 
     initPusher();
 
-    fetch("/api/room/" + (router.query.slug.toString() ?? "") + "/join", {
-      method: "POST",
-      body: JSON.stringify({
-        id: session.data?.user.id,
-        name: session.data?.user?.name,
-      }),
-    })
+    fetch(
+      "/api/room/" +
+        (router.query.slug.toString().toUpperCase() ?? "") +
+        "/join",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          id: session.data?.user.id,
+          name: session.data?.user?.name,
+        }),
+      },
+    )
       .then((res) => {
         if (res.status === 200) {
           setSuccessfullJoin(true);
