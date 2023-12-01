@@ -84,9 +84,11 @@ export default function QuizMaster() {
     ];
 
     return (
-      <div className="prose flex flex-col items-center overflow-x-auto pt-10">
-        <h2>Mina skapade quiz</h2>
-        <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center pt-10">
+        <div className="prose">
+          <h2 >Mina skapade quiz</h2>
+        </div>
+        <div className="flex flex-col w-full overflow-y-auto h-80 gap-4">
           {quizzes.map((quiz) => (
             <div
               key={quiz.id}
@@ -147,7 +149,7 @@ export default function QuizMaster() {
         onLoad={() => void tryAuthorize()} // Assuming tryAuthorize is defined elsewhere
       />
       <main className="flex flex-auto flex-col items-center justify-center">
-        <div className="flex flex-col items-center gap-4 md:flex-row">
+        <div className="flex flex-col items-center md:flex-row">
           <CreateQuizCard />
           {!isAuthorized && (
             <ActionButton

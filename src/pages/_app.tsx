@@ -22,9 +22,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <SessionProvider session={session}>
       <AuthContext.Provider value={{ session }}>
-        <div className="flex flex-col h-screen max-h-screen bg-base-200">
+        <div className="flex flex-col min-h-screen bg-base-200">
           <Navbar />
-          <div className="flex flex-auto"> 
+          <div className="flex flex-grow">
             <Component {...pageProps} />
           </div>
           <Footer />

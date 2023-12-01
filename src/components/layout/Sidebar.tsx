@@ -38,7 +38,7 @@ const Sidebar: React.FC<{
     const selectedQuestion = selectedQuestionDetail !== null ? questions[selectedQuestionDetail] : undefined;
   
     return (
-      <div className="overflow-y-auto h-full max-h-full w-full bg-base-100">
+      <div className="flex overflow-y-auto h-full max-h-full w-full bg-base-100">
         <table className="table w-full ">
           <thead>
             <tr>

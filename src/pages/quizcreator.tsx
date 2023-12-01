@@ -86,9 +86,9 @@ export default function QuizCreator() {
         <meta name="description" content="Nu är det dags för QUIZ!" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex flex-auto flex-row">
+      <main className="flex flex-auto">
         <GoBackButton />
-        <div className="flex flex-auto h-full w-full items-center justify-center gap-5 p-5">
+        <div className="flex flex-auto items-center justify-center gap-5 p-5">
             {!isQuizNameSaved 
               ? <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />
               :     <QuestionForm 
@@ -105,7 +105,7 @@ export default function QuizCreator() {
                       />
             }
         </div>
-        <div className="flex overflow-y-auto flex-auto w-1/4 h-full max-h-screen bg-black">
+        <div className="flex w-1/3">
               <Sidebar 
                 questions={questions} 
                 onSelectQuestion={handleSelectQuestion} 
