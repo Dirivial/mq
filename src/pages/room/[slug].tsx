@@ -18,6 +18,7 @@ import {
 } from "~/utils/musicPlayer";
 import Head from "next/head";
 import Script from "next/script";
+import { useSearchParams } from "next/navigation";
 
 type SimpleQuestion = {
   id: number;
@@ -53,11 +54,16 @@ export default function Room() {
   const [phase, setPhase] = useState("waiting");
   const [counter, setCounter] = useState<number>(5);
   const [showQuestion, setShowQuestion] = useState(false);
+  const searchParams = useSearchParams();
 
-  const { data: questionData, isSuccess: gotQuestions } =
-    api.question.getSomeQuestions.useQuery(undefined, {
+  const { data: quizData, isSuccess: gotQuiz } = api.quiz.getQuiz.useQuery(
+    {
+      id: Number(searchParams.get("qid") ?? 1),
+    },
+    {
       enabled: questions.length === 0,
-    });
+    },
+  );
 
   const addMemberToList = (id: string, name: string) => {
     setMembers((prev) => [...prev, { id: id, name: name, score: 0 }]);
@@ -77,7 +83,9 @@ export default function Room() {
       questions.map((q) => q.id),
     );
     fetch(
-      "/api/room/" + (router.query.slug.toString() ?? "no-room") + "/start",
+      "/api/room/" +
+        (router.query.slug.toString().toUpperCase() ?? "no-room") +
+        "/start",
       {
         method: "POST",
         body: JSON.stringify({ questionIds: questions.map((q) => q.id) }),
@@ -101,7 +109,9 @@ export default function Room() {
       cluster: "eu",
     });
 
-    const channel = p.subscribe("game@" + router.query.slug?.toString());
+    const channel = p.subscribe(
+      "game@" + router.query.slug?.toString().toUpperCase(),
+    );
 
     // Listen for join events
     channel.bind("join", function (data: UserJoin) {
@@ -146,14 +156,18 @@ export default function Room() {
   };
 
   const getURL = () => {
-    return env.NEXT_PUBLIC_URL + "/play/" + router.query.slug?.toString();
+    return (
+      env.NEXT_PUBLIC_URL +
+      "/play/" +
+      router.query.slug?.toString().toUpperCase()
+    );
   };
 
   useEffect(() => {
-    if (gotQuestions && questions.length === 0) {
-      setQuestions(PrepareForQuiz(questionData));
+    if (gotQuiz && quizData?.questions && questions.length === 0) {
+      setQuestions(PrepareForQuiz(quizData.questions, quizData.questionsOrder));
     }
-  }, [questionData, gotQuestions, questions]);
+  }, [gotQuiz, quizData, questions]);
 
   // Music kit authorization
   const tryAuthorize = async () => {
@@ -169,7 +183,7 @@ export default function Room() {
     const sendNext = (nextQuestionIndex: number) => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
       GenericBroadcast(
-        router.query.slug.toString() ?? "no-room",
+        router.query.slug.toString().toUpperCase() ?? "no-room",
         "new-question",
         {
           newQuestionIndex: nextQuestionIndex,
@@ -180,9 +194,13 @@ export default function Room() {
     // TODO: Implement this
     const handleGameEnd = () => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
-      GenericBroadcast(router.query.slug.toString() ?? "no-room", "end", {
-        topThree: [],
-      });
+      GenericBroadcast(
+        router.query.slug.toString().toUpperCase() ?? "no-room",
+        "end",
+        {
+          topThree: [],
+        },
+      );
       setPhase("results");
       Pause();
       void ClearQueueFull();
@@ -295,9 +313,7 @@ export default function Room() {
             <>
               <div className="mb-8 flex flex-col items-center gap-3 text-center">
                 <div>
-                  <span className="text-xl font-bold ">
-                    RUM ID
-                  </span>
+                  <span className="text-xl font-bold ">RUM ID</span>
                   <div className="text-3xl font-bold text-accent">
                     {String(router.query.slug).toUpperCase()}
                   </div>
@@ -415,7 +431,10 @@ function ShowQuizStarting(props: QuizStartingInterface) {
   );
 }
 
-function PrepareForQuiz(questionData: Question[]): SimpleQuestion[] {
+function PrepareForQuiz(
+  questionData: Question[],
+  order: number[],
+): SimpleQuestion[] {
   const questions: SimpleQuestion[] = [];
 
   questionData.forEach((question) => {
@@ -434,6 +453,11 @@ function PrepareForQuiz(questionData: Question[]): SimpleQuestion[] {
       songId: question.content,
       answers: answers,
     });
+  });
+
+  // Sort questions in the order specified
+  questions.sort((a, b) => {
+    return order.indexOf(a.id) - order.indexOf(b.id);
   });
 
   ClearQueueFull()

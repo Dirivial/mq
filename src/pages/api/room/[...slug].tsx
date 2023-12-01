@@ -48,7 +48,7 @@ export default async function handler(
         const body = UserJoinSchema.parse(rawData);
 
         await pusher
-          .trigger("game@" + slug?.at(0)?.toString(), "join", {
+          .trigger("game@" + slug?.at(0)?.toString().toUpperCase(), "join", {
             id: body.id,
             name: body.name,
           })
@@ -88,7 +88,7 @@ export default async function handler(
             console.log(e);
           });
       } else {
-        console.log("No action given");
+        console.log("No action given/unhandled action: " + slug?.at(1));
       }
     } catch (e) {
       console.log(e);

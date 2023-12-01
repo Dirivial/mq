@@ -32,6 +32,66 @@ export const questionRouter = createTRPCRouter({
     return ctx.db.question.findMany();
   }),
 
+  createQuestion: protectedProcedure
+    .input(
+      z.object({
+        text: z.string(),
+        questionType: z.string(),
+        content: z.string(),
+        answer: z.string(),
+        categories: z.number().array(),
+        start: z.number(),
+        end: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const question = await ctx.db.question.create({
+        data: {
+          text: input.text,
+          type: input.questionType,
+          answer: input.answer,
+          startTime: input.start,
+          endTime: input.end,
+          content: input.content,
+          lastPicked: new Date(),
+          categories: {
+            connect: input.categories.map((category) => ({ id: category })),
+          },
+        },
+      });
+      return question;
+    }),
+
+  updateQuestion: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        text: z.string(),
+        questionType: z.string(),
+        content: z.string(),
+        answer: z.string(),
+        categories: z.number().array(),
+        start: z.number(),
+        end: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.question.update({
+        where: { id: input.id },
+        data: {
+          text: input.text,
+          type: input.questionType,
+          answer: input.answer,
+          startTime: input.start,
+          endTime: input.end,
+          content: input.content,
+          categories: {
+            connect: input.categories.map((category) => ({ id: category })),
+          },
+        },
+      });
+    }),
+
   removeQuestion: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
