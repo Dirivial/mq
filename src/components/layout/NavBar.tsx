@@ -25,7 +25,7 @@ const Navbar = () => {
           </div>
           
           <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral rounded-box w-52">
-            <li><a onClick={handleSignOut}>Logga ut</a></li>
+            <li className='text-white hover:text-white' onClick={handleSignOut}><a >Logga ut</a></li>
           </ul>
         </div>
       );

@@ -26,6 +26,7 @@ type Answer = {
 };
 
 export default function Play() {
+  const [answerSelected, setAnswerSelected] = useState<boolean>(false);
   const router = useRouter();
   const session = useSession();
   const [pusher, setPusher] = useState<Pusher | null>(null);
@@ -76,6 +77,7 @@ export default function Play() {
     channel.bind("new-question", function (data: NewQuestion) {
       setCurrentIndex(data.newQuestionIndex);
       setTimePassed(0);
+      setAnswerSelected(false);
     });
 
     // Handle end of question
@@ -143,6 +145,7 @@ export default function Play() {
 
   // Handle player answering a question
   const handleAnswer = (correct: boolean) => {
+    setAnswerSelected(true);
     // Only allow answering once
     if (results.length === currentIndex) {
       if (correct) {
@@ -214,8 +217,7 @@ export default function Play() {
   }, []);
 
   return (
-    <div className="">
-      <main className=" bg-base flex min-h-screen flex-col items-center text-base-content">
+      <main className="flex flex-1 flex-col items-center">
         <GoBackButton />
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           {!successfullJoin ||
@@ -243,6 +245,8 @@ export default function Play() {
                         }
                         currentIndex={currentIndex}
                         setAnswer={handleAnswer}
+                        answerSelected={answerSelected}
+                        quizLength={questionData?.length}
                       />
                     </>
                   )}
@@ -269,7 +273,6 @@ export default function Play() {
           )}
         </div>
       </main>
-    </div>
   );
 }
 
@@ -277,28 +280,39 @@ interface CurrentQuestionInterface {
   question: SimpleQuestion;
   currentIndex: number;
   setAnswer: (answer: boolean) => void;
+  answerSelected: boolean;
+  quizLength?: number; // Add this line
 }
 
 function ShowCurrentQuestion(props: CurrentQuestionInterface) {
   return (
     <div>
       <h1 className="text-center text-2xl font-bold">{props.question.name}</h1>
-      <div className="mt-10 grid grid-cols-2 gap-2">
-        {props.question.answers.map((answer, index) => (
-          <button
-            className="btn btn-accent btn-outline h-24 text-lg"
-            key={index}
-            onClick={() => props.setAnswer(answer.correct)}
-          >
-            <h3>{answer.text}</h3>
-          </button>
-        ))}
-      </div>
+      {props.answerSelected ? (
+        // Display a message when an answer has been selected
+        <div className="flex flex-1 text-center">
+          Answer recorded. Please wait for the next question.
+        </div>
+      ) : (
+        // Display the answer options when no answer has been selected
+        <div className="mt-10 grid grid-cols-2 gap-2">
+          {props.question.answers.map((answer, index) => (
+            <button
+              className="btn btn-accent btn-outline h-24 text-lg"
+              key={index}
+              onClick={() => props.setAnswer(answer.correct)}
+            >
+              <h3>{answer.text}</h3>
+            </button>
+          ))}
+        </div>
+      )}
       <div className="flex flex-col p-10">
         <h3 className="text-center text-xl font-bold">
-          {props.currentIndex + 1}/5
+          {props.currentIndex + 1}/{props.quizLength}
         </h3>
       </div>
     </div>
   );
 }
+
