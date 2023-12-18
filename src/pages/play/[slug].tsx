@@ -219,7 +219,7 @@ export default function Play() {
   return (
       <main className="flex flex-1 flex-col items-center">
         <GoBackButton />
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+        <div className="container flex flex-grow flex-col items-center justify-center gap-12 px-4 py-16">
           {!successfullJoin ||
             (questionIds === undefined && (
               <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[3rem]">
@@ -228,9 +228,9 @@ export default function Play() {
             ))}
 
           {successfullJoin ? (
-            <div>
+            <div className="flex flex-grow w-full">
               {questionIds != undefined && questionIds.length > 0 ? (
-                <div>
+                <div className="flex flex-grow">
                   {currentIndex === -1 ? (
                     <span>Nu kör vi!</span>
                   ) : (
@@ -252,7 +252,9 @@ export default function Play() {
                   )}
                 </div>
               ) : (
-                <span>Väntar på att spelet ska starta...</span>
+                <div className="flex flex-grow prose items-center justify-center text-center">
+                  <h1>Väntar på att spelet ska starta...</h1>
+                </div>
               )}
             </div>
           ) : (
@@ -286,16 +288,16 @@ interface CurrentQuestionInterface {
 
 function ShowCurrentQuestion(props: CurrentQuestionInterface) {
   return (
-    <div>
+    <div className="flex flex-col flex-grow justify-center prose">
       <h1 className="text-center text-2xl font-bold">{props.question.name}</h1>
       {props.answerSelected ? (
         // Display a message when an answer has been selected
-        <div className="flex flex-1 text-center">
-          Answer recorded. Please wait for the next question.
+        <div className="flex mt-10 grid grid-cols-1 gap-2 prose text-center">
+          <h1>Svar registrerat! Häng kvar så kommer nästa fråga strax.</h1>
         </div>
       ) : (
         // Display the answer options when no answer has been selected
-        <div className="mt-10 grid grid-cols-2 gap-2">
+        <div className="flex mt-10 grid grid-cols-2 gap-2">
           {props.question.answers.map((answer, index) => (
             <button
               className="btn btn-accent btn-outline h-24 text-lg"
