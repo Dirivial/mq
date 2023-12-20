@@ -31,6 +31,7 @@ export default function Play() {
   const session = useSession();
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
+  const [quizFinished, setQuizFinished] = useState<boolean>(false);
 
   /* 
     Realistically this could change if we lean into having a "quiz" rather than a list of questions.
@@ -165,6 +166,15 @@ export default function Play() {
     This converts all the questions to a more digestible format.
     I hate that it's in a useEffect, but I currently don't know how to do it in a different way due to tRPC + useQuery.
   */
+
+    useEffect(() => {
+      // Check if the quiz is finished: All questions are answered, the last question index is reached, and the quiz has started
+      if (currentIndex !== -1 && currentIndex >= questionIds.length - 1 && results.length === questionIds.length) {
+        setQuizFinished(true);
+      }
+    }, [currentIndex, questionIds.length, results]);
+
+
   useEffect(() => {
     if (gotQuestions && questions.length === 0 && questionData.length > 0) {
       console.log(questionData);
@@ -184,6 +194,8 @@ export default function Play() {
         const q = questionData.find((q) => q.id === id);
         if (q) orderedQuestions.push(q);
       });
+
+      
 
       // Convert the questions to a more digestible format
       orderedQuestions.forEach((question) => {
@@ -216,66 +228,60 @@ export default function Play() {
     return () => clearInterval(interval);
   }, []);
 
-  return (
-      <main className="flex flex-1 flex-col items-center">
-        <GoBackButton />
-        <div className="container flex flex-grow flex-col items-center justify-center gap-12 px-4 py-16">
-          {!successfullJoin ||
-            (questionIds === undefined && (
-              <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[3rem]">
-                {router.query.slug}
-              </h1>
-            ))}
-
-          {successfullJoin ? (
-            <div className="flex flex-grow w-full">
-              {questionIds != undefined && questionIds.length > 0 ? (
-                <div className="flex flex-grow">
-                  {currentIndex === -1 ? (
-                    <span>Nu kör vi!</span>
-                  ) : (
-                    <>
-                      <ShowCurrentQuestion
-                        question={
-                          questions.at(currentIndex) ?? {
-                            name: "",
-                            songId: "",
-                            answers: [],
-                          }
-                        }
-                        currentIndex={currentIndex}
-                        setAnswer={handleAnswer}
-                        answerSelected={answerSelected}
-                        quizLength={questionData?.length}
-                      />
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-grow prose items-center justify-center text-center">
-                  <h1>Väntar på att spelet ska starta...</h1>
-                </div>
-              )}
-            </div>
+return (
+  <main className="flex flex-1 flex-col items-center">
+    <div className="container flex flex-grow flex-col items-center justify-center gap-12 px-4 py-16">
+      {quizFinished ? (
+        // Quiz finished message
+        <div className="prose text-center">
+          <h1>Quizet är slut!</h1>
+          <p>Tack för att du deltog!</p>
+          {/* Optionally, show the final score or other information here */}
+        </div>
+      ) : successfullJoin ? (
+        // Quiz in progress
+        questionIds !== undefined && questionIds.length > 0 ? (
+          currentIndex === -1 ? (
+            <span>Nu kör vi!</span>
           ) : (
-            <div>
-              {session.status === "authenticated" ? (
-                <button className="btn btn-primary btn-wide" onClick={sendCall}>
-                  Anslut Till Rummet
-                </button>
-              ) : (
-                <button
-                  className="btn btn-primary btn-wide"
-                  onClick={() => void signIn()}
-                >
-                  Logga In
-                </button>
-              )}
-            </div>
+            <ShowCurrentQuestion
+              question={
+                questions.at(currentIndex) ?? {
+                  name: "",
+                  songId: "",
+                  answers: [],
+                }
+              }
+              currentIndex={currentIndex}
+              setAnswer={handleAnswer}
+              answerSelected={answerSelected}
+              quizLength={questionData?.length}
+            />
+          )
+        ) : (
+          // Waiting for the quiz to start
+          <div className="flex flex-grow prose items-center justify-center text-center">
+            <h1>Väntar på att spelet ska starta...</h1>
+          </div>
+        )
+      ) : (
+        // Not joined or authenticated
+        <div>
+          {session.status === "authenticated" ? (
+            <button className="btn btn-primary btn-wide" onClick={sendCall}>
+              Anslut Till Rummet
+            </button>
+          ) : (
+            <button className="btn btn-primary btn-wide" onClick={() => void signIn()}>
+              Logga In
+            </button>
           )}
         </div>
-      </main>
-  );
+      )}
+    </div>
+  </main>
+);
+
 }
 
 interface CurrentQuestionInterface {

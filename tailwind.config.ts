@@ -1,6 +1,6 @@
 import { type Config } from "tailwindcss";
 
-export default {
+const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {},
@@ -12,4 +12,6 @@ export default {
   daisyui: {
     themes: ["light", "dark", "night", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "nord", "emerald"], 
   },
-}
+};
+
+export default config;

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from "next/head";
 import Link from "next/link";
 import Navbar from "~/components/layout/NavBar";
+import FloatingShapes from "~/components/animations/floatingShapes";
 
 import { api } from "~/utils/api";
 
@@ -15,7 +16,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex flex-grow items-center justify-center">
-        <div className="container mx-auto p-4 text-center">
+        <FloatingShapes/>
+
+        <div className="container mx-auto p-4 text-center z-10">
           <Header />
           <AuthShowcase />
         </div>
@@ -45,7 +48,6 @@ function AuthShowcase() {
   return (
   
     <div>
-
       <div className="flex flex-col items-center justify-center gap-4">
         {sessionData && (
           <Link href="/quizmaster" className="btn btn-primary btn-wide">

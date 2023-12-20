@@ -6,7 +6,7 @@ import QRCode from "react-qr-code";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
 import { type Question } from "@prisma/client";
-import GoBackButton from "~/components/layout/GoBackButton";
+import FloatingShapes from "~/components/animations/floatingShapes";
 
 import {
   SkipToNext,
@@ -261,8 +261,8 @@ export default function Room() {
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
         onLoad={() => void tryAuthorize()}
       />
-      <div className="flex flex-1 flex-col items-center">
-        <GoBackButton />
+      <FloatingShapes />
+      <div className="flex flex-1 flex-col items-center z-10">
         <main className="mx-auto my-auto flex h-[50vh] w-4/5 flex-col items-center justify-center">
           {phase === "results" && (
             <div className="my-12 flex h-full flex-col justify-start">
