@@ -39,3 +39,11 @@ export type Answer = {
   text: string;
   correct: boolean;
 };
+
+export type SimpleQuestion = {
+  id?: number;
+  name: string;
+  songId: string;
+  answers: Answer[];
+};
+

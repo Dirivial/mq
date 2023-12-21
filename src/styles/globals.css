@@ -165,3 +165,37 @@
 /*
 -- End BackGround Animation 
 */
+
+
+/* Floating Player Names Animation */
+.floating-player {
+	animation: float 6s ease-in-out infinite, sideWays 6s ease-in-out infinite alternate;
+	font-size: 20px; /* Adjust size as needed */
+	color: white; /* Example of setting color to white */
+  }
+  
+  @keyframes float {
+	0%, 100% {
+	  transform: translateY(0px);
+	}
+	50% {
+	  transform: translateY(20px, 10px);
+	}
+	
+  }
+  
+  @keyframes sideWays {
+	0%, 100% {
+	  transform: translate(0px, 0px);
+	}
+	50% {
+	  transform: translate(10px, 0px);
+	}
+  }
+  
+  .floating-container {
+	position: relative;
+	height: 300px; /* Adjust based on your needs */
+	width: 100%;
+	overflow: hidden;
+  }

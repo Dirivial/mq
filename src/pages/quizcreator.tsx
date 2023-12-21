@@ -2,7 +2,7 @@ import Head from "next/head";
 //import Link from "next/link";
 import { useState } from "react";
 import type { Question, Quiz, QuizNameInputProps,} from "~/utils/types";
-import QuestionForm from "~/components/quizcreation/QuestionForm";
+import QuestionForm from "~/components/quiz/quizcreation/QuestionForm";
 import Sidebar from "~/components/layout/Sidebar";
 
 const QuizNameInput: React.FC<QuizNameInputProps> = ({ value, onChange, onNameSave }) => {

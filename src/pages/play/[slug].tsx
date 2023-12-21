@@ -4,26 +4,10 @@ import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
-import GoBackButton from "~/components/layout/GoBackButton";
+import type { SimpleQuestion } from "~/utils/types";
+import type { CurrentQuestionInterface, GameStart, NewQuestion } from "~/utils/interfaces";
+import ShowCurrentQuestion from "~/components/quiz/quizdisplay/ShowCurrentQuestion";
 
-interface GameStart {
-  questionIds: number[];
-}
-
-interface NewQuestion {
-  newQuestionIndex: number;
-}
-
-type SimpleQuestion = {
-  name: string;
-  songId: string;
-  answers: Answer[];
-};
-
-type Answer = {
-  text: string;
-  correct: boolean;
-};
 
 export default function Play() {
   const [answerSelected, setAnswerSelected] = useState<boolean>(false);
@@ -228,9 +212,15 @@ export default function Play() {
     return () => clearInterval(interval);
   }, []);
 
+  // useEffect hook to automatically join the game when authenticated
+  useEffect(() => {
+    if (session.status === "authenticated") {
+      sendCall();
+    }
+  }, [session.status]);
+
 return (
-  <main className="flex flex-1 flex-col items-center">
-    <div className="container flex flex-grow flex-col items-center justify-center gap-12 px-4 py-16">
+  <main className="flex flex-1 flex-col items-center z-10 justify-center">
       {quizFinished ? (
         // Quiz finished message
         <div className="prose text-center">
@@ -256,71 +246,35 @@ return (
               setAnswer={handleAnswer}
               answerSelected={answerSelected}
               quizLength={questionData?.length}
+              allowAnswerSelection={true}
             />
           )
         ) : (
           // Waiting for the quiz to start
-          <div className="flex flex-grow prose items-center justify-center text-center">
-            <h1>Väntar på att spelet ska starta...</h1>
+          <div className="flex flex-grow flex-col prose items-center justify-center text-center">
+            <h2>Väntar på att spelet ska starta</h2>
+            <span className="loading loading-dots loading-lg"></span>
           </div>
         )
       ) : (
         // Not joined or authenticated
-        <div>
-          {session.status === "authenticated" ? (
-            <button className="btn btn-primary btn-wide" onClick={sendCall}>
-              Anslut Till Rummet
-            </button>
-          ) : (
-            <button className="btn btn-primary btn-wide" onClick={() => void signIn()}>
-              Logga In
-            </button>
-          )}
+          <div className="prose text-center">
+            {session.status === "authenticated" ? (
+              <div>
+              <p>Connecting to the quiz</p> 
+              <span className="loading loading-spinner loading-xs"></span>
+              </div>
+            ) : (
+              <button className="btn btn-primary btn-wide" onClick={() => void signIn()}>
+                Logga In
+              </button>
+            )}
         </div>
       )}
-    </div>
   </main>
 );
 
 }
 
-interface CurrentQuestionInterface {
-  question: SimpleQuestion;
-  currentIndex: number;
-  setAnswer: (answer: boolean) => void;
-  answerSelected: boolean;
-  quizLength?: number; // Add this line
-}
 
-function ShowCurrentQuestion(props: CurrentQuestionInterface) {
-  return (
-    <div className="flex flex-col flex-grow justify-center prose">
-      <h1 className="text-center text-2xl font-bold">{props.question.name}</h1>
-      {props.answerSelected ? (
-        // Display a message when an answer has been selected
-        <div className="flex mt-10 grid grid-cols-1 gap-2 prose text-center">
-          <h1>Svar registrerat! Häng kvar så kommer nästa fråga strax.</h1>
-        </div>
-      ) : (
-        // Display the answer options when no answer has been selected
-        <div className="flex mt-10 grid grid-cols-2 gap-2">
-          {props.question.answers.map((answer, index) => (
-            <button
-              className="btn btn-accent btn-outline h-24 text-lg"
-              key={index}
-              onClick={() => props.setAnswer(answer.correct)}
-            >
-              <h3>{answer.text}</h3>
-            </button>
-          ))}
-        </div>
-      )}
-      <div className="flex flex-col p-10">
-        <h3 className="text-center text-xl font-bold">
-          {props.currentIndex + 1}/{props.quizLength}
-        </h3>
-      </div>
-    </div>
-  );
-}
 
