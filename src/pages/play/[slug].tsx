@@ -16,6 +16,8 @@ export default function Play() {
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
   const [quizFinished, setQuizFinished] = useState<boolean>(false);
+  const [username, setUsername] = useState('');
+  const [isChoosingUsername, setIsChoosingUsername] = useState(true);
 
   /* 
     Realistically this could change if we lean into having a "quiz" rather than a list of questions.
@@ -100,33 +102,6 @@ export default function Play() {
       });
   };
 
-  // Send info to the host that we've joined the game
-  const sendCall = () => {
-    if (!router.query.slug || router.query.slug.at(0) === "") return;
-
-    initPusher();
-
-    fetch(
-      "/api/room/" +
-        (router.query.slug.toString().toUpperCase() ?? "") +
-        "/join",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          id: session.data?.user.id,
-          name: session.data?.user?.name,
-        }),
-      },
-    )
-      .then((res) => {
-        if (res.status === 200) {
-          setSuccessfullJoin(true);
-        }
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  };
 
   // Handle player answering a question
   const handleAnswer = (correct: boolean) => {
@@ -153,7 +128,7 @@ export default function Play() {
 
     useEffect(() => {
       // Check if the quiz is finished: All questions are answered, the last question index is reached, and the quiz has started
-      if (currentIndex !== -1 && currentIndex >= questionIds.length - 1 && results.length === questionIds.length) {
+      if (currentIndex !== -1 && currentIndex >= questionIds.length - 1) {
         setQuizFinished(true);
       }
     }, [currentIndex, questionIds.length, results]);
@@ -178,8 +153,6 @@ export default function Play() {
         const q = questionData.find((q) => q.id === id);
         if (q) orderedQuestions.push(q);
       });
-
-      
 
       // Convert the questions to a more digestible format
       orderedQuestions.forEach((question) => {
@@ -213,41 +186,95 @@ export default function Play() {
   }, []);
 
   // useEffect hook to automatically join the game when authenticated
+  const chooseUsername = (newUsername: string) => {
+    setUsername(newUsername);
+    setIsChoosingUsername(false);
+    // Here, you can also add logic to update the username in the user's profile
+  };
+
+  const sendCall = () => {
+    if (!router.query.slug || router.query.slug.at(0) === "") return;
+
+    initPusher();
+
+    fetch(
+      "/api/room/" +
+        (router.query.slug.toString().toUpperCase() ?? "") +
+        "/join",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          id: session.data?.user.id,
+          name: session.data?.user?.name,
+        }),
+      },
+    )
+      .then((res) => {
+        if (res.status === 200) {
+          setSuccessfullJoin(true);
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
+  // Call sendCall function after setting the username
   useEffect(() => {
-    if (session.status === "authenticated") {
+    if (!isChoosingUsername && session.status === "authenticated") {
       sendCall();
     }
-  }, [session.status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isChoosingUsername, session.status]);
 
-return (
-  <main className="flex flex-1 flex-col items-center z-10 justify-center">
-      {quizFinished ? (
+  return (
+    <main className="mx-auto my-auto flex h-[50vh] w-[90vw] flex-col items-center justify-center card">
+      {isChoosingUsername && session.status === "authenticated" ? (
+        // Username selection form
+        <div className="flex flex-col items-center">
+          <input
+            type="text"
+            placeholder="Enter your username"
+            className="input input-bordered w-full max-w-xs"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <button
+            className="btn btn-primary mt-4"
+            onClick={() => chooseUsername(username)}
+          >
+            Set Username
+          </button>
+        </div>
+      ) : quizFinished ? (
         // Quiz finished message
         <div className="prose text-center">
           <h1>Quizet är slut!</h1>
           <p>Tack för att du deltog!</p>
-          {/* Optionally, show the final score or other information here */}
         </div>
       ) : successfullJoin ? (
         // Quiz in progress
-        questionIds !== undefined && questionIds.length > 0 ? (
+        questionIds.length > 0 ? (
           currentIndex === -1 ? (
             <span>Nu kör vi!</span>
           ) : (
-            <ShowCurrentQuestion
-              question={
-                questions.at(currentIndex) ?? {
-                  name: "",
-                  songId: "",
-                  answers: [],
+            <div className="flex flex-grow w-full">
+              <ShowCurrentQuestion
+                question={
+                  questions.at(currentIndex) ?? {
+                    name: "",
+                    songId: "",
+                    answers: [],
+                  }
                 }
-              }
-              currentIndex={currentIndex}
-              setAnswer={handleAnswer}
-              answerSelected={answerSelected}
-              quizLength={questionData?.length}
-              allowAnswerSelection={true}
-            />
+                currentIndex={currentIndex}
+                setAnswer={handleAnswer}
+                answerSelected={answerSelected}
+                quizLength={questionData?.length}
+                allowAnswerSelection={true}
+                time={timePassed}
+              />
+            </div>
           )
         ) : (
           // Waiting for the quiz to start
@@ -258,21 +285,22 @@ return (
         )
       ) : (
         // Not joined or authenticated
-          <div className="prose text-center">
-            {session.status === "authenticated" ? (
-              <div>
+        <div className="prose text-center">
+          {session.status === "authenticated" ? (
+            <div>
               <p>Connecting to the quiz</p> 
               <span className="loading loading-spinner loading-xs"></span>
-              </div>
-            ) : (
-              <button className="btn btn-primary btn-wide" onClick={() => void signIn()}>
-                Logga In
-              </button>
-            )}
+            </div>
+          ) : (
+            <button className="btn btn-primary btn-wide" onClick={() => void signIn()}>
+              Logga In
+            </button>
+          )}
         </div>
       )}
-  </main>
-);
+    </main>
+  );
+  
 
 }
 

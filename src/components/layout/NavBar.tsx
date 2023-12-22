@@ -18,7 +18,7 @@ const Navbar = () => {
         <div className="dropdown dropdown-end">
           <div className="avatar indicator">
             <span className="indicator-item indicator-start badge badge-primary text-xs font-bold">
-              {String(sessionData.user.email).split('@')[0]?.toUpperCase()}
+              {String(sessionData.user.name)}
             </span>
             <label tabIndex={0} className="btn btn-ghost btn-circle">
               <img alt="User Avatar" src="/avatar.png" />

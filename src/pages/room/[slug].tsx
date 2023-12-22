@@ -116,18 +116,12 @@ export default function Room() {
     );
 
     // Listen for join events
-    channel.bind("join", function (data: UserJoin) {
-      try {
-        const name = data.name;
-        const id = data.id;
-        if (name === undefined || id === undefined) {
-          throw new Error("Player joined with undefined credentials");
-        } else {
-          console.log("Player joined with name " + name);
-          addMemberToList(id, name);
-        }
-      } catch (e) {
-        console.log(e);
+    channel.bind("join", (data: UserJoin) => {
+      if (data.id && data.name) {
+        console.log("Player joined:", data.name);
+        addMemberToList(data.id, data.name);
+      } else {
+        console.error("Invalid player data received");
       }
     });
 
@@ -182,29 +176,33 @@ export default function Room() {
   };
 
   useEffect(() => {
-    const openRoomAutomatically = () => {
-      const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
-        cluster: "eu",
-      });
-
-      const channel = p.subscribe(
-        "game@" + router.query.slug?.toString().toUpperCase(),
-      );
-
-      // Bind to Pusher events (join, score, etc.)
-      channel.bind("join", function (_data: UserJoin) {
-        // ... existing join logic
-      });
-      channel.bind("score", function (_data: { id: string; score: number }) {
-        // ... existing score logic
-      });
-
-      setPusher(p);
+    if (!router.query.slug || pusher) return;
+  
+    const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
+      cluster: "eu",
+    });
+  
+    const channel = p.subscribe(
+      "game@" + router.query.slug.toString().toUpperCase(),
+    );
+  
+    channel.bind("join", (data: UserJoin) => {
+      if (data.id && data.name) {
+        console.log("Player joined:", data.name);
+        addMemberToList(data.id, data.name);
+      } else {
+        console.error("Invalid player data received");
+      }
+    });
+  
+    setPusher(p);
+  
+    // Cleanup function to unsubscribe when the component unmounts
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+      setPusher(null);
     };
-
-    if (router.query.slug) {
-      openRoomAutomatically();
-    }
   }, [router.query.slug]);
 
 
@@ -275,16 +273,6 @@ export default function Room() {
     return () => clearInterval(interval);
   }, [currentIndex, counter, phase, router.query.slug]);
 
-  
-  const members_display = [
-    { name: 'Diana Jones' },
-    { name: 'Bob Brown' },
-    { name: 'Charlie Smith' },
-    { name: 'Diana Smith' },
-    { name: 'Bob Johnson' },
-    { name: 'Bob Johnson' },
-    { name: 'Alice Johnson' }
-  ];
 
   
   return (
