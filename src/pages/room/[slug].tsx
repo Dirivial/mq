@@ -212,7 +212,7 @@ export default function Room() {
         setCounter(0);
         const nextQuestionIndex = currentIndex + 1;
 
-        if (nextQuestionIndex < 5) {
+        if (nextQuestionIndex < questions.length) {
           setCurrentIndex(nextQuestionIndex);
           sendNext(nextQuestionIndex);
           setShowQuestion(false);
@@ -242,7 +242,7 @@ export default function Room() {
       }
     }, 100);
     return () => clearInterval(interval);
-  }, [currentIndex, counter, phase, router.query.slug]);
+  }, [currentIndex, counter, phase, router.query.slug, questions.length]);
 
   return (
     <>
@@ -299,6 +299,7 @@ export default function Room() {
                 time={counter}
                 currentIndex={currentIndex}
                 show={showQuestion}
+                numberOfQuestions={questions.length}
               />
             </>
           )}
@@ -382,6 +383,7 @@ interface CurrentQuestionInterface {
   time: number;
   currentIndex: number;
   show: boolean;
+  numberOfQuestions: number;
 }
 
 function ShowCurrentQuestion(props: CurrentQuestionInterface) {
@@ -409,7 +411,7 @@ function ShowCurrentQuestion(props: CurrentQuestionInterface) {
               max="30"
             ></progress>
             <h3 className="text-center text-xl font-bold">
-              {props.currentIndex + 1}/5
+              {props.currentIndex + 1}/{props.numberOfQuestions}
             </h3>
           </div>
         </>
