@@ -21,7 +21,7 @@ const Navbar = () => {
               {String(sessionData.user.name)}
             </span>
             <label tabIndex={0} className="btn btn-ghost btn-circle">
-              <img alt="User Avatar" src="/avatar.png" />
+              <img alt="User Avatar" src="https://github.com/Dirivial/mq/blob/main/public/Avatar.png" />
             </label>
           </div>
           
@@ -34,7 +34,7 @@ const Navbar = () => {
       return (
         <div className="flex avatar indicator">
           <div className="flex w-10 h-10 rounded-full ">
-            <img alt="No login" src="/qmark.png" />
+            <img alt="No login" src="https://github.com/Dirivial/mq/blob/main/public/qmark.png" />
           </div>
         </div>
       );
