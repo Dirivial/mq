@@ -20,7 +20,7 @@ function ShowCurrentQuestion(props: CurrentQuestionInterface) {
           <h1 className="text-center text-4xl font-bold mt-5 ">{props.question.name}</h1>
           {props.answerSelected ? (
             <div className="flex mt-10 grid grid-cols-1 gap-2 prose text-center">
-              <h1>Svar registrerat! Häng kvar så kommer nästa fråga strax.</h1>
+              <h3>Svar registrerat! Häng kvar så kommer nästa fråga strax.</h3>
             </div>
           ) : (
             <div className="flex flex-grow mt-10 grid grid-cols-2 gap-2">

@@ -58,7 +58,7 @@ export default function QuizMaster() {
     return (
       <div className="card card-compact w-80 bg-base-100 text-center shadow-xl">
         <figure>
-          <img src="quizroom.png" alt="Shoes" />
+          <img src="https://github.com/Dirivial/mq/blob/main/public/quizCard.png" alt="Shoes" />
         </figure>
         <div className="card-body flex items-center items-center justify-center">
           <h2 className="card-title flex">Öppna ett rum Quizrum!</h2>

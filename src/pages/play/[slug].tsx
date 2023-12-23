@@ -117,7 +117,7 @@ export default function Play() {
       setResults((results) => [...results, false]);
       sendScore(score);
     }
-    console.log(results);
+    //console.log(results);
   };
 
   /*
