@@ -1,9 +1,8 @@
 import Head from "next/head";
 //import Link from "next/link";
 import { useState } from "react";
-import GoBackButton from "~/components/layout/GoBackButton";
 import type { Question, Quiz, QuizNameInputProps,} from "~/utils/types";
-import QuestionForm from "~/components/quizcreation/QuestionForm";
+import QuestionForm from "~/components/quiz/quizcreation/QuestionForm";
 import Sidebar from "~/components/layout/Sidebar";
 
 const QuizNameInput: React.FC<QuizNameInputProps> = ({ value, onChange, onNameSave }) => {
@@ -87,7 +86,6 @@ export default function QuizCreator() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex flex-auto">
-        <GoBackButton />
         <div className="flex flex-auto items-center justify-center gap-5 p-5">
             {!isQuizNameSaved 
               ? <QuizNameInput value={quizName} onChange={handleQuizNameChange} onNameSave={handleQuizNameSave} />

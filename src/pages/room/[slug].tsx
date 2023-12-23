@@ -6,7 +6,9 @@ import QRCode from "react-qr-code";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
 import { type Question } from "@prisma/client";
-import GoBackButton from "~/components/layout/GoBackButton";
+import FloatingShapes from "~/components/animations/floatingShapes";
+import ShowCurrentQuestion from "~/components/quiz/quizdisplay/ShowCurrentQuestion";
+//import { SimpleQuestion } from "~/utils/types";
 
 import {
   SkipToNext,
@@ -114,18 +116,12 @@ export default function Room() {
     );
 
     // Listen for join events
-    channel.bind("join", function (data: UserJoin) {
-      try {
-        const name = data.name;
-        const id = data.id;
-        if (name === undefined || id === undefined) {
-          throw new Error("Player joined with undefined credentials");
-        } else {
-          console.log("Player joined with name " + name);
-          addMemberToList(id, name);
-        }
-      } catch (e) {
-        console.log(e);
+    channel.bind("join", (data: UserJoin) => {
+      if (data.id && data.name) {
+        console.log("Player joined:", data.name);
+        addMemberToList(data.id, data.name);
+      } else {
+        console.error("Invalid player data received");
       }
     });
 
@@ -180,6 +176,37 @@ export default function Room() {
   };
 
   useEffect(() => {
+    if (!router.query.slug || pusher) return;
+  
+    const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
+      cluster: "eu",
+    });
+  
+    const channel = p.subscribe(
+      "game@" + router.query.slug.toString().toUpperCase(),
+    );
+  
+    channel.bind("join", (data: UserJoin) => {
+      if (data.id && data.name) {
+        console.log("Player joined:", data.name);
+        addMemberToList(data.id, data.name);
+      } else {
+        console.error("Invalid player data received");
+      }
+    });
+  
+    setPusher(p);
+  
+    // Cleanup function to unsubscribe when the component unmounts
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+      setPusher(null);
+    };
+  }, [router.query.slug]);
+
+
+  useEffect(() => {
     const sendNext = (nextQuestionIndex: number) => {
       if (!router.query.slug || router.query.slug.at(0) === "") return;
       GenericBroadcast(
@@ -190,6 +217,8 @@ export default function Room() {
         },
       );
     };
+
+    
 
     // TODO: Implement this
     const handleGameEnd = () => {
@@ -244,6 +273,8 @@ export default function Room() {
     return () => clearInterval(interval);
   }, [currentIndex, counter, phase, router.query.slug, questions.length]);
 
+
+  
   return (
     <>
       <Head>
@@ -261,9 +292,9 @@ export default function Room() {
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
         onLoad={() => void tryAuthorize()}
       />
-      <div className="flex flex-1 flex-col items-center">
-        <GoBackButton />
-        <main className="mx-auto my-auto flex h-[50vh] w-4/5 flex-col items-center justify-center">
+      <FloatingShapes />
+      <div className="flex flex-1 flex-col items-center z-10 ">
+        <main className="mx-auto my-auto flex h-[50vh] w-[90vw] flex-col items-center justify-center card">
           {phase === "results" && (
             <div className="my-12 flex h-full flex-col justify-start">
               <h1 className="mb-12 text-center text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
@@ -286,7 +317,7 @@ export default function Room() {
           )}
 
           {phase === "playing" && (
-            <>
+              <div className="flex flex-grow w-full">
               <ShowCurrentQuestion
                 question={
                   questions.at(currentIndex) ?? {
@@ -299,9 +330,10 @@ export default function Room() {
                 time={counter}
                 currentIndex={currentIndex}
                 show={showQuestion}
-                numberOfQuestions={questions.length}
+                allowAnswerSelection={false}
+                quizLength={questions.length}
               />
-            </>
+              </div>
           )}
 
           {phase === "starting" && (
@@ -311,7 +343,9 @@ export default function Room() {
           )}
 
           {phase === "waiting" && (
-            <>
+            <div className="">
+            <div className="flex card bg-base-100 p-5 pl-10 pr-10 shadow-xl">
+
               <div className="mb-8 flex flex-col items-center gap-3 text-center">
                 <div>
                   <span className="text-xl font-bold ">RUM ID</span>
@@ -319,22 +353,14 @@ export default function Room() {
                     {String(router.query.slug).toUpperCase()}
                   </div>
                 </div>
-                {pusher != null ? (
-                  <div className="flex flex-col items-center">
-                    {/* <span className="mb-2 text-sm text-gray-500">{pusher.connection.state}</span> */}
-                    <QRCode
-                      className="rounded-md bg-white p-2"
-                      value={getURL()}
-                    />
-                  </div>
-                ) : (
-                  <button
-                    className="btn btn-primary btn-wide"
-                    onClick={openRoom}
-                  >
-                    Öppna Rum
-                  </button>
-                )}
+                {pusher != null && (
+                <div className="flex flex-col items-center">
+                  <QRCode
+                    className="rounded-md bg-white p-2"
+                    value={getURL()}
+                  />
+                </div>
+              )}
                 <button
                   className="btn btn-primary btn-wide mt-4"
                   onClick={sendStart}
@@ -342,22 +368,24 @@ export default function Room() {
                   Starta
                 </button>
               </div>
-
-              <div className="">
-                <div className="mb-4 grid grid-cols-1 grid-rows-2">
-                  <span className="loading loading-spinner loading-md m-auto"></span>
+              <div className="flex flex-col items-center mb-4">
+                <span className="loading loading-ring loading-lg"></span>
                   <span>{members.length} spelare</span>
-                </div>
-                <div>
-                  <h2 className="text-center text-2xl font-bold">Spelare</h2>
-                  <ul className="text-base-content">
-                    {members.map((member, index) => (
-                      <li key={index}>{member.name}</li>
-                    ))}
-                  </ul>
-                </div>
               </div>
-            </>
+            </div>
+
+                <div className="flex flex-col items-center pt-5">
+                  <h2 className="text-center text-2xl font-bold mb-5">Spelare</h2>
+                  {members.map((member, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col floating-player"
+                    >
+                      {member.name}
+                    </div>
+                  ))}
+                </div>
+            </div>
           )}
         </main>
       </div>
@@ -384,40 +412,6 @@ interface CurrentQuestionInterface {
   currentIndex: number;
   show: boolean;
   numberOfQuestions: number;
-}
-
-function ShowCurrentQuestion(props: CurrentQuestionInterface) {
-  return (
-    <div>
-      {props.show && (
-        <>
-          <h1 className="text-center text-2xl font-bold">
-            {props.question.name}
-          </h1>
-          <div className="mt-10 grid grid-cols-2 gap-2">
-            {props.question.answers.map((answer, index) => (
-              <button
-                className="btn btn-accent btn-outline h-24 text-lg"
-                key={index}
-              >
-                <h3>{answer.text}</h3>
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-col p-10">
-            <progress
-              className="progress mx-auto w-96"
-              value={props.time}
-              max="30"
-            ></progress>
-            <h3 className="text-center text-xl font-bold">
-              {props.currentIndex + 1}/{props.numberOfQuestions}
-            </h3>
-          </div>
-        </>
-      )}
-    </div>
-  );
 }
 
 interface QuizStartingInterface {

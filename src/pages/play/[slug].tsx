@@ -4,32 +4,18 @@ import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
-import GoBackButton from "~/components/layout/GoBackButton";
+import type { SimpleQuestion } from "~/utils/types";
+import type { CurrentQuestionInterface, GameStart, NewQuestion } from "~/utils/interfaces";
+import ShowCurrentQuestion from "~/components/quiz/quizdisplay/ShowCurrentQuestion";
 
-interface GameStart {
-  questionIds: number[];
-}
-
-interface NewQuestion {
-  newQuestionIndex: number;
-}
-
-type SimpleQuestion = {
-  name: string;
-  songId: string;
-  answers: Answer[];
-};
-
-type Answer = {
-  text: string;
-  correct: boolean;
-};
 
 export default function Play() {
+  const [answerSelected, setAnswerSelected] = useState<boolean>(false);
   const router = useRouter();
   const session = useSession();
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
+  const [quizFinished, setQuizFinished] = useState<boolean>(false);
 
   /* 
     Realistically this could change if we lean into having a "quiz" rather than a list of questions.
@@ -76,6 +62,7 @@ export default function Play() {
     channel.bind("new-question", function (data: NewQuestion) {
       setCurrentIndex(data.newQuestionIndex);
       setTimePassed(0);
+      setAnswerSelected(false);
     });
 
     // Handle end of question
@@ -113,36 +100,10 @@ export default function Play() {
       });
   };
 
-  // Send info to the host that we've joined the game
-  const sendCall = () => {
-    if (!router.query.slug || router.query.slug.at(0) === "") return;
-
-    initPusher();
-
-    fetch(
-      "/api/room/" +
-        (router.query.slug.toString().toUpperCase() ?? "") +
-        "/join",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          id: session.data?.user.id,
-          name: session.data?.user?.name,
-        }),
-      },
-    )
-      .then((res) => {
-        if (res.status === 200) {
-          setSuccessfullJoin(true);
-        }
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  };
 
   // Handle player answering a question
   const handleAnswer = (correct: boolean) => {
+    setAnswerSelected(true);
     // Only allow answering once
     if (results.length === currentIndex) {
       if (correct) {
@@ -162,6 +123,15 @@ export default function Play() {
     This converts all the questions to a more digestible format.
     I hate that it's in a useEffect, but I currently don't know how to do it in a different way due to tRPC + useQuery.
   */
+
+    useEffect(() => {
+      // Check if the quiz is finished: All questions are answered, the last question index is reached, and the quiz has started
+      if (currentIndex !== -1 && currentIndex >= questionIds.length - 1) {
+        setQuizFinished(true);
+      }
+    }, [currentIndex, questionIds.length, results]);
+
+
   useEffect(() => {
     if (gotQuestions && questions.length === 0 && questionData.length > 0) {
       console.log(questionData);
@@ -213,92 +183,101 @@ export default function Play() {
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div className="">
-      <main className=" bg-base flex min-h-screen flex-col items-center text-base-content">
-        <GoBackButton />
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          {!successfullJoin ||
-            (questionIds === undefined && (
-              <h1 className="text-6xl font-extrabold tracking-tight text-base-content sm:text-[3rem]">
-                {router.query.slug}
-              </h1>
-            ))}
 
-          {successfullJoin ? (
+  const sendCall = () => {
+    if (!router.query.slug || router.query.slug.at(0) === "") return;
+
+    initPusher();
+
+    fetch(
+      "/api/room/" +
+        (router.query.slug.toString().toUpperCase() ?? "") +
+        "/join",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          id: session.data?.user.id,
+          name: session.data?.user?.name,
+        }),
+      },
+    )
+      .then((res) => {
+        if (res.status === 200) {
+          setSuccessfullJoin(true);
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
+  // Call sendCall function after setting the username
+  useEffect(() => {
+    if (session.status === "authenticated") {
+      sendCall();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session.status]);
+
+  return (
+    <main className="mx-auto my-auto flex h-[50vh] w-[90vw] flex-col items-center justify-center card">
+      {quizFinished ? (
+        // Quiz finished message
+        <div className="prose text-center">
+          <h1>Quizet är slut!</h1>
+          <p>Tack för att du deltog!</p>
+        </div>
+      ) : successfullJoin ? (
+        // Quiz in progress
+        questionIds.length > 0 ? (
+          currentIndex === -1 ? (
+            <span>Nu kör vi!</span>
+          ) : (
+            <div className="flex flex-grow w-full">
+              <ShowCurrentQuestion
+                question={
+                  questions.at(currentIndex) ?? {
+                    name: "",
+                    songId: "",
+                    answers: [],
+                  }
+                }
+                currentIndex={currentIndex}
+                setAnswer={handleAnswer}
+                answerSelected={answerSelected}
+                quizLength={questionData?.length}
+                allowAnswerSelection={true}
+                time={timePassed}
+              />
+            </div>
+          )
+        ) : (
+          // Waiting for the quiz to start
+          <div className="flex flex-grow flex-col prose items-center justify-center text-center">
+            <h2>Väntar på att spelet ska starta</h2>
+            <span className="loading loading-dots loading-lg"></span>
+          </div>
+        )
+      ) : (
+        // Not joined or authenticated
+        <div className="prose text-center">
+          {session.status === "authenticated" ? (
             <div>
-              {questionIds != undefined && questionIds.length > 0 ? (
-                <div>
-                  {currentIndex === -1 ? (
-                    <span>Nu kör vi!</span>
-                  ) : (
-                    <>
-                      <ShowCurrentQuestion
-                        question={
-                          questions.at(currentIndex) ?? {
-                            name: "",
-                            songId: "",
-                            answers: [],
-                          }
-                        }
-                        currentIndex={currentIndex}
-                        setAnswer={handleAnswer}
-                      />
-                    </>
-                  )}
-                </div>
-              ) : (
-                <span>Väntar på att spelet ska starta...</span>
-              )}
+              <p>Connecting to the quiz</p> 
+              <span className="loading loading-spinner loading-xs"></span>
             </div>
           ) : (
-            <div>
-              {session.status === "authenticated" ? (
-                <button className="btn btn-primary btn-wide" onClick={sendCall}>
-                  Anslut Till Rummet
-                </button>
-              ) : (
-                <button
-                  className="btn btn-primary btn-wide"
-                  onClick={() => void signIn()}
-                >
-                  Logga In
-                </button>
-              )}
-            </div>
+            <button className="btn btn-primary btn-wide" onClick={() => void signIn()}>
+              Logga In
+            </button>
           )}
         </div>
-      </main>
-    </div>
+      )}
+    </main>
   );
+  
+
 }
 
-interface CurrentQuestionInterface {
-  question: SimpleQuestion;
-  currentIndex: number;
-  setAnswer: (answer: boolean) => void;
-}
 
-function ShowCurrentQuestion(props: CurrentQuestionInterface) {
-  return (
-    <div>
-      <h1 className="text-center text-2xl font-bold">{props.question.name}</h1>
-      <div className="mt-10 grid grid-cols-2 gap-2">
-        {props.question.answers.map((answer, index) => (
-          <button
-            className="btn btn-accent btn-outline h-24 text-lg"
-            key={index}
-            onClick={() => props.setAnswer(answer.correct)}
-          >
-            <h3>{answer.text}</h3>
-          </button>
-        ))}
-      </div>
-      <div className="flex flex-col p-10">
-        <h3 className="text-center text-xl font-bold">
-          {props.currentIndex + 1}/5
-        </h3>
-      </div>
-    </div>
-  );
-}
+
