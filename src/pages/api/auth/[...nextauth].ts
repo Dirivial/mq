@@ -5,10 +5,14 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
-import EmailProvider from "next-auth/providers/email";
+//import EmailProvider from "next-auth/providers/email";
+import GoogleProvider from "next-auth/providers/google";
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ??= "";
 
 function MyAdapter(): Adapter {
   const prisma = new PrismaClient();
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const a = PrismaAdapter(prisma) as Adapter;
   return a;
@@ -17,11 +21,15 @@ function MyAdapter(): Adapter {
 authOptions.adapter = MyAdapter();
 
 authOptions.providers = [
+  GoogleProvider({    
+    clientId: (GOOGLE_CLIENT_ID),
+    clientSecret: (process.env.GOOGLE_CLIENT_SECRET ??= ""),
+  }),
   DiscordProvider({
     clientId: (process.env.DISCORD_CLIENT_ID ??= ""),
     clientSecret: (process.env.DISCORD_CLIENT_SECRET ??= ""),
   }),
-  EmailProvider({
+  /*EmailProvider({
     async sendVerificationRequest({ identifier: email, url }) {
       // Call the cloud Email provider API for sending emails
       // See https://docs.sendgrid.com/api-reference/mail-send/mail-send
@@ -31,7 +39,7 @@ authOptions.providers = [
           from: { email: "alexander.kadeby@gmail.com" },
           subject: "Sign in to Your page",
           content: [
-            {
+            {   
               type: "text/html",
               value: `Please click <a href="${url}">here</a> to authenticate.`,
             },
@@ -50,7 +58,7 @@ authOptions.providers = [
         throw new Error(JSON.stringify(errors));
       }
     },
-  }),
+  }),*/
 ];
 
 export default NextAuth(authOptions);

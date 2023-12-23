@@ -16,8 +16,6 @@ export default function Play() {
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [successfullJoin, setSuccessfullJoin] = useState<boolean>(false);
   const [quizFinished, setQuizFinished] = useState<boolean>(false);
-  const [username, setUsername] = useState('');
-  const [isChoosingUsername, setIsChoosingUsername] = useState(true);
 
   /* 
     Realistically this could change if we lean into having a "quiz" rather than a list of questions.
@@ -185,12 +183,6 @@ export default function Play() {
     return () => clearInterval(interval);
   }, []);
 
-  // useEffect hook to automatically join the game when authenticated
-  const chooseUsername = (newUsername: string) => {
-    setUsername(newUsername);
-    setIsChoosingUsername(false);
-    // Here, you can also add logic to update the username in the user's profile
-  };
 
   const sendCall = () => {
     if (!router.query.slug || router.query.slug.at(0) === "") return;
@@ -221,32 +213,15 @@ export default function Play() {
 
   // Call sendCall function after setting the username
   useEffect(() => {
-    if (!isChoosingUsername && session.status === "authenticated") {
+    if (session.status === "authenticated") {
       sendCall();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isChoosingUsername, session.status]);
+  }, [session.status]);
 
   return (
     <main className="mx-auto my-auto flex h-[50vh] w-[90vw] flex-col items-center justify-center card">
-      {isChoosingUsername && session.status === "authenticated" ? (
-        // Username selection form
-        <div className="flex flex-col items-center">
-          <input
-            type="text"
-            placeholder="Enter your username"
-            className="input input-bordered w-full max-w-xs"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <button
-            className="btn btn-primary mt-4"
-            onClick={() => chooseUsername(username)}
-          >
-            Set Username
-          </button>
-        </div>
-      ) : quizFinished ? (
+      {quizFinished ? (
         // Quiz finished message
         <div className="prose text-center">
           <h1>Quizet är slut!</h1>
