@@ -91,6 +91,14 @@ export default async function handler(
           .catch((e) => {
             console.log(e);
           });
+      } else if (slug?.at(1) === "end") {
+        await pusher
+          .trigger("game@" + slug?.at(0)?.toString().toUpperCase(), "end", {
+            topThree: [],
+          })
+          .catch((e) => {
+            console.log(e);
+          });
       } else {
         console.log("No action given/unhandled action: " + slug?.at(1));
       }
