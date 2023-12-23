@@ -15,9 +15,9 @@ function ShowCurrentQuestion(props: CurrentQuestionInterface) {
   
     return (
       <div className="flex flex-grow card bg-base-100 shadow-xl">
-      <main className="mx-auto my-auto flex h-[50vh] w-full flex-col items-center justify-center p-5">
+      <main className="mx-auto my-auto flex h-[60vh] w-full flex-col items-center justify-center md:pl-10 md:pr-10 pl-5 pr-5 pt-5">
         <div className="flex flex-col flex-grow w-full justify-center">
-          <h1 className="text-center text-2xl font-bold mt-5">{props.question.name}</h1>
+          <h1 className="text-center text-4xl font-bold mt-5 ">{props.question.name}</h1>
           {props.answerSelected ? (
             <div className="flex mt-10 grid grid-cols-1 gap-2 prose text-center">
               <h1>Svar registrerat! Häng kvar så kommer nästa fråga strax.</h1>
@@ -26,7 +26,7 @@ function ShowCurrentQuestion(props: CurrentQuestionInterface) {
             <div className="flex flex-grow mt-10 grid grid-cols-2 gap-2">
               {props.question.answers.map((answer, index) => (
                 <button
-                  className="flex flex-grow h-full btn btn-outline btn-accent text-9xl font-bold"
+                  className="flex flex-grow h-full btn btn-outline btn-accent md:text-4xl text-xl font-bold"
                   key={index}
                   onClick={() => handleAnswerClick(answer.correct)}
                 >
@@ -35,7 +35,7 @@ function ShowCurrentQuestion(props: CurrentQuestionInterface) {
               ))}
             </div>
           )}
-          <div className="flex flex-col p-5">
+          <div className="flex flex-col mt-10 mb-10">
             {props.time !== undefined && (
               <progress
                 className="progress w-full mx-auto"
@@ -43,7 +43,7 @@ function ShowCurrentQuestion(props: CurrentQuestionInterface) {
                 max="30"
               ></progress>
             )}
-            <h3 className="text-center text-xl font-bold">
+            <h3 className="text-center text-4xl font-bold mt-5">
               {props.currentIndex + 1}/{props.quizLength}
             </h3>
           </div>
