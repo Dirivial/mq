@@ -106,20 +106,18 @@ export default function Play() {
 
   // Handle player answering a question
   const handleAnswer = (correct: boolean) => {
+    console.log("Answered: ", correct);
     setAnswerSelected(true);
     // Only allow answering once
-    if (results.length === currentIndex) {
-      if (correct) {
-        sendScore(score + 1);
-        setScore((score) => score + 1);
-        setResults((results) => [...results, true]);
-      } else {
-        setResults((results) => [...results, false]);
-        sendScore(score);
-      }
-
-      console.log(results);
+    if (correct) {
+      sendScore(score + 1);
+      setScore((score) => score + 1);
+      setResults((results) => [...results, true]);
+    } else {
+      setResults((results) => [...results, false]);
+      sendScore(score);
     }
+    console.log(results);
   };
 
   /*
