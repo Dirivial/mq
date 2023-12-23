@@ -2,11 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.btn {
-  font-size: 16px !important; /* Override DaisyUI's button font size */
-  
-  /*font-weight: bold !important;  Override default font weight */
-}
 
 /*Start Animations*/
 @-webkit-keyframes animatetop {
