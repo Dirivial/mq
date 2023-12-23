@@ -77,7 +77,7 @@ export default function Play() {
     });
 
     // Handle end of game
-    channel.bind("end", function (data: number) {
+    channel.bind("end", function (data: number[]) {
       console.log("End game ", data);
       setTimePassed(0);
       setQuizFinished(true);
