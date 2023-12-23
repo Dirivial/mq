@@ -203,6 +203,12 @@ export default function Room() {
         if (id === undefined || score === undefined) {
           throw new Error("Player scored with undefined credentials");
         } else {
+          console.log(
+            "New score: ",
+            members.find((m) => m.id === id)?.name,
+            id,
+            score,
+          );
           setMembers((prev) =>
             prev.map((p) => {
               if (p.id === id) {
