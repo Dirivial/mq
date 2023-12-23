@@ -241,7 +241,7 @@ export default function Room() {
         setCounter(0);
         const nextQuestionIndex = currentIndex + 1;
 
-        if (nextQuestionIndex < 5) {
+        if (nextQuestionIndex < questions.length) {
           setCurrentIndex(nextQuestionIndex);
           sendNext(nextQuestionIndex);
           setShowQuestion(false);
@@ -271,7 +271,7 @@ export default function Room() {
       }
     }, 100);
     return () => clearInterval(interval);
-  }, [currentIndex, counter, phase, router.query.slug]);
+  }, [currentIndex, counter, phase, router.query.slug, questions.length]);
 
 
   
@@ -411,8 +411,8 @@ interface CurrentQuestionInterface {
   time: number;
   currentIndex: number;
   show: boolean;
+  numberOfQuestions: number;
 }
-
 
 interface QuizStartingInterface {
   time: number;
