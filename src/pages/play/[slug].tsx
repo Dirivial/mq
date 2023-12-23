@@ -5,9 +5,12 @@ import { useEffect, useState } from "react";
 import { env } from "~/env.mjs";
 import { api } from "~/utils/api";
 import type { SimpleQuestion } from "~/utils/types";
-import type { CurrentQuestionInterface, GameStart, NewQuestion } from "~/utils/interfaces";
+import type {
+  CurrentQuestionInterface,
+  GameStart,
+  NewQuestion,
+} from "~/utils/interfaces";
 import ShowCurrentQuestion from "~/components/quiz/quizdisplay/ShowCurrentQuestion";
-
 
 export default function Play() {
   const [answerSelected, setAnswerSelected] = useState<boolean>(false);
@@ -74,9 +77,10 @@ export default function Play() {
     });
 
     // Handle end of game
-    channel.bind("end", function (data: number) {
+    channel.bind("end", function (data: number[]) {
       console.log("End game ", data);
       setTimePassed(0);
+      setQuizFinished(true);
     });
 
     setPusher(p);
@@ -99,7 +103,6 @@ export default function Play() {
         console.log(e);
       });
   };
-
 
   // Handle player answering a question
   const handleAnswer = (correct: boolean) => {
@@ -124,13 +127,12 @@ export default function Play() {
     I hate that it's in a useEffect, but I currently don't know how to do it in a different way due to tRPC + useQuery.
   */
 
-    useEffect(() => {
-      // Check if the quiz is finished: All questions are answered, the last question index is reached, and the quiz has started
-      if (currentIndex !== -1 && currentIndex >= questionIds.length - 1) {
-        setQuizFinished(true);
-      }
-    }, [currentIndex, questionIds.length, results]);
-
+  useEffect(() => {
+    // Check if the quiz is finished: All questions are answered, the last question index is reached, and the quiz has started
+    if (currentIndex !== -1 && currentIndex >= questionIds.length) {
+      setQuizFinished(true);
+    }
+  }, [currentIndex, questionIds.length, results]);
 
   useEffect(() => {
     if (gotQuestions && questions.length === 0 && questionData.length > 0) {
@@ -183,7 +185,6 @@ export default function Play() {
     return () => clearInterval(interval);
   }, []);
 
-
   const sendCall = () => {
     if (!router.query.slug || router.query.slug.at(0) === "") return;
 
@@ -220,7 +221,7 @@ export default function Play() {
   }, [session.status]);
 
   return (
-    <main className="mx-auto my-auto flex h-[50vh] w-[90vw] flex-col items-center justify-center card">
+    <main className="card mx-auto my-auto flex h-[50vh] w-[90vw] flex-col items-center justify-center">
       {quizFinished ? (
         // Quiz finished message
         <div className="prose text-center">
@@ -233,7 +234,7 @@ export default function Play() {
           currentIndex === -1 ? (
             <span>Nu kör vi!</span>
           ) : (
-            <div className="flex flex-grow w-full">
+            <div className="flex w-full flex-grow">
               <ShowCurrentQuestion
                 question={
                   questions.at(currentIndex) ?? {
@@ -253,7 +254,7 @@ export default function Play() {
           )
         ) : (
           // Waiting for the quiz to start
-          <div className="flex flex-grow flex-col prose items-center justify-center text-center">
+          <div className="prose flex flex-grow flex-col items-center justify-center text-center">
             <h2>Väntar på att spelet ska starta</h2>
             <span className="loading loading-dots loading-lg"></span>
           </div>
@@ -263,11 +264,14 @@ export default function Play() {
         <div className="prose text-center">
           {session.status === "authenticated" ? (
             <div>
-              <p>Connecting to the quiz</p> 
+              <p>Connecting to the quiz</p>
               <span className="loading loading-spinner loading-xs"></span>
             </div>
           ) : (
-            <button className="btn btn-primary btn-wide" onClick={() => void signIn()}>
+            <button
+              className="btn btn-primary btn-wide"
+              onClick={() => void signIn()}
+            >
               Logga In
             </button>
           )}
@@ -275,9 +279,4 @@ export default function Play() {
       )}
     </main>
   );
-  
-
 }
-
-
-

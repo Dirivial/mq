@@ -177,15 +177,15 @@ export default function Room() {
 
   useEffect(() => {
     if (!router.query.slug || pusher) return;
-  
+
     const p = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: "eu",
     });
-  
+
     const channel = p.subscribe(
       "game@" + router.query.slug.toString().toUpperCase(),
     );
-  
+
     channel.bind("join", (data: UserJoin) => {
       if (data.id && data.name) {
         console.log("Player joined:", data.name);
@@ -194,9 +194,31 @@ export default function Room() {
         console.error("Invalid player data received");
       }
     });
-  
+
+    // Listen for score events
+    channel.bind("score", function (data: { id: string; score: number }) {
+      try {
+        const id = data.id;
+        const score = data.score;
+        if (id === undefined || score === undefined) {
+          throw new Error("Player scored with undefined credentials");
+        } else {
+          setMembers((prev) =>
+            prev.map((p) => {
+              if (p.id === id) {
+                return { ...p, score: score };
+              } else {
+                return p;
+              }
+            }),
+          );
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    });
     setPusher(p);
-  
+
     // Cleanup function to unsubscribe when the component unmounts
     return () => {
       channel.unbind_all();
@@ -204,7 +226,6 @@ export default function Room() {
       setPusher(null);
     };
   }, [router.query.slug]);
-
 
   useEffect(() => {
     const sendNext = (nextQuestionIndex: number) => {
@@ -217,8 +238,6 @@ export default function Room() {
         },
       );
     };
-
-    
 
     // TODO: Implement this
     const handleGameEnd = () => {
@@ -273,8 +292,6 @@ export default function Room() {
     return () => clearInterval(interval);
   }, [currentIndex, counter, phase, router.query.slug, questions.length]);
 
-
-  
   return (
     <>
       <Head>
@@ -293,8 +310,8 @@ export default function Room() {
         onLoad={() => void tryAuthorize()}
       />
       <FloatingShapes />
-      <div className="flex flex-1 flex-col items-center z-10 ">
-        <main className="mx-auto my-auto flex h-[50vh] w-[90vw] flex-col items-center justify-center card">
+      <div className="z-10 flex flex-1 flex-col items-center ">
+        <main className="card mx-auto my-auto flex h-[50vh] w-[90vw] flex-col items-center justify-center">
           {phase === "results" && (
             <div className="my-12 flex h-full flex-col justify-start">
               <h1 className="mb-12 text-center text-6xl font-extrabold tracking-tight text-base-content sm:text-[7rem]">
@@ -317,7 +334,7 @@ export default function Room() {
           )}
 
           {phase === "playing" && (
-              <div className="flex flex-grow w-full">
+            <div className="flex w-full flex-grow">
               <ShowCurrentQuestion
                 question={
                   questions.at(currentIndex) ?? {
@@ -333,7 +350,7 @@ export default function Room() {
                 allowAnswerSelection={false}
                 quizLength={questions.length}
               />
-              </div>
+            </div>
           )}
 
           {phase === "starting" && (
@@ -344,47 +361,43 @@ export default function Room() {
 
           {phase === "waiting" && (
             <div className="">
-            <div className="flex card bg-base-100 p-5 pl-10 pr-10 shadow-xl">
-
-              <div className="mb-8 flex flex-col items-center gap-3 text-center">
-                <div>
-                  <span className="text-xl font-bold ">RUM ID</span>
-                  <div className="text-3xl font-bold text-accent">
-                    {String(router.query.slug).toUpperCase()}
-                  </div>
-                </div>
-                {pusher != null && (
-                <div className="flex flex-col items-center">
-                  <QRCode
-                    className="rounded-md bg-white p-2"
-                    value={getURL()}
-                  />
-                </div>
-              )}
-                <button
-                  className="btn btn-primary btn-wide mt-4"
-                  onClick={sendStart}
-                >
-                  Starta
-                </button>
-              </div>
-              <div className="flex flex-col items-center mb-4">
-                <span className="loading loading-ring loading-lg"></span>
-                  <span>{members.length} spelare</span>
-              </div>
-            </div>
-
-                <div className="flex flex-col items-center pt-5">
-                  <h2 className="text-center text-2xl font-bold mb-5">Spelare</h2>
-                  {members.map((member, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col floating-player"
-                    >
-                      {member.name}
+              <div className="card flex bg-base-100 p-5 pl-10 pr-10 shadow-xl">
+                <div className="mb-8 flex flex-col items-center gap-3 text-center">
+                  <div>
+                    <span className="text-xl font-bold ">RUM ID</span>
+                    <div className="text-3xl font-bold text-accent">
+                      {String(router.query.slug).toUpperCase()}
                     </div>
-                  ))}
+                  </div>
+                  {pusher != null && (
+                    <div className="flex flex-col items-center">
+                      <QRCode
+                        className="rounded-md bg-white p-2"
+                        value={getURL()}
+                      />
+                    </div>
+                  )}
+                  <button
+                    className="btn btn-primary btn-wide mt-4"
+                    onClick={sendStart}
+                  >
+                    Starta
+                  </button>
                 </div>
+                <div className="mb-4 flex flex-col items-center">
+                  <span className="loading loading-ring loading-lg"></span>
+                  <span>{members.length} spelare</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center pt-5">
+                <h2 className="mb-5 text-center text-2xl font-bold">Spelare</h2>
+                {members.map((member, index) => (
+                  <div key={index} className="floating-player flex flex-col">
+                    {member.name}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </main>

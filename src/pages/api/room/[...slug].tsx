@@ -60,7 +60,7 @@ export default async function handler(
         const questionIds = body.questionIds;
 
         await pusher
-          .trigger("game@" + slug?.at(0)?.toString(), "start", {
+          .trigger("game@" + slug?.at(0)?.toString().toUpperCase(), "start", {
             questionIds: questionIds,
           })
           .catch((e) => {
@@ -70,9 +70,13 @@ export default async function handler(
         const body = NewQuestionSchema.parse(rawData);
         const newQuestionIndex = body.newQuestionIndex;
         await pusher
-          .trigger("game@" + slug?.at(0)?.toString(), "new-question", {
-            newQuestionIndex: newQuestionIndex,
-          })
+          .trigger(
+            "game@" + slug?.at(0)?.toString().toUpperCase(),
+            "new-question",
+            {
+              newQuestionIndex: newQuestionIndex,
+            },
+          )
           .catch((e) => {
             console.log(e);
           });
@@ -80,9 +84,17 @@ export default async function handler(
         const body = UserScoreSchema.parse(rawData);
 
         await pusher
-          .trigger("game@" + slug?.at(0)?.toString(), "score", {
+          .trigger("game@" + slug?.at(0)?.toString().toUpperCase(), "score", {
             id: body.id,
             score: body.score,
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else if (slug?.at(1) === "end") {
+        await pusher
+          .trigger("game@" + slug?.at(0)?.toString().toUpperCase(), "end", {
+            topThree: [],
           })
           .catch((e) => {
             console.log(e);
