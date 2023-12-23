@@ -43,6 +43,10 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
+        name:
+          session.user.name ??
+          session.user.email?.split("@")?.at(0) ??
+          "Användare",
       },
     }),
   },
