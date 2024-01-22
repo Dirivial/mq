@@ -235,6 +235,7 @@ export default function Play() {
             <div className="flex w-full flex-grow">
               <ShowCurrentQuestion
                 question={
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                   questions.at(currentIndex) ?? {
                     name: "",
                     songId: "",

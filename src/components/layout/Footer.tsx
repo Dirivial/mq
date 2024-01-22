@@ -1,6 +1,6 @@
 const Footer = () => {
     return (
-    <footer className="footer footer-center p-3 bg-base-100 z-10">
+    <footer className="footer w-1/6 footer-center p-3 bg-base-100 z-10">
     <aside>
         <p className="font-bold opacity-30">
         ARKINO - Social Entertainment Systems

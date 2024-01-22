@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 import Navbar from "~/components/layout/NavBar";
 import { AuthContext } from "~/components/auth/authContext";
 import Footer from "~/components/layout/Footer";
+import Sidebar from "~/components/layout/Sidebar";
 
 
 import "~/styles/globals.css";
@@ -16,18 +17,18 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'nord');
+    document.documentElement.setAttribute('data-theme', 'light');
   }, []);
 
   return (
     <SessionProvider session={session}>
       <AuthContext.Provider value={{ session }}>
-        <div className="flex flex-col min-h-screen bg-base-200">
-          <Navbar />
+        <div className="flex min-h-screen bg-base-200">
+          <Navbar/>
           <div className="flex flex-grow">
             <Component {...pageProps} />
           </div>
-          <Footer />
+          <Sidebar/>
         </div>
       </AuthContext.Provider>
     </SessionProvider>

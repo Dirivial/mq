@@ -1,8 +1,15 @@
 //import Link from "next/link";
 import { useState } from "react";
 import type { Question} from "~/utils/types";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { createAvatar } from '@dicebear/core';
+import { personas } from '@dicebear/collection';
 
 
+
+/*
 const QuestionDetail: React.FC<{ question: Question }> = ({ question }) => {
     return (
       <div>
@@ -84,5 +91,93 @@ const Sidebar: React.FC<{
       </div>
     );
   };
+*/
+
+
+
+const Sidebar = () => {
+  const router = useRouter();
+  const { data: sessionData } = useSession();
+  const currentPage = String(router.pathname).split("/")[1];
+
+  const handleSignOut = () => {
+    void signOut({ callbackUrl: "/" });
+  };
+
+  const avatar = createAvatar(personas, {
+    seed: `${sessionData?.user?.name ?? "no user"}`,
+  });
+  
+  const svg = avatar.toString(); 
+
+  const UserIndicator = () => {
+    if (sessionData) {
+      return (
+        <div className="flex flex-col items-center prose">
+          <div className="card flex h-60 w-3/4 bg-base-200 shadow-xl rounded-full justify-center">
+                <svg
+                  dangerouslySetInnerHTML={{ __html: svg }}
+                />
+          </div>
+          <h2 className="mt-5">
+            Hej {String(sessionData.user.name)}!
+          </h2>
+        </div>
+      );
+    } else {
+      return (
+        <div className="avatar indicator flex ">
+          <div className="flex h-15 w-10 rounded-full ">
+            <img
+              alt="No login"
+              src="https://raw.githubusercontent.com/Dirivial/mq/main/public/qmark.png"
+            />
+          </div>
+        </div>
+      );
+    }
+  };
+
+  const UserStats = () => {
+    if (sessionData) {
+      return (
+        <div className="flex flex-col items-center prose pt-5">
+          <div className="flex space-x-4">
+            <div className="flex flex-row w-24 h-32 bg-green-opacity shadow-xl rounded-xl justify-center items-center">
+              <p className="text-4xl font-bold ">0</p>
+              <p className="text-xl">Rätt</p>
+            </div>
+            <div className="flex flex-row w-24 h-32 bg-red-opacity shadow-xl rounded-xl justify-center items-center">
+              <p className="text-4xl font-bold">0</p>
+              <p className="text-xl">Fel</p>
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex flex-col items-center prose pt-5">
+          <div className="flex space-x-4">
+            <div className="flex flex-row w-24 h-32 bg-green-opacity shadow-xl rounded-xl justify-center items-center">
+              <p className="text-4xl font-bold ">0</p>
+              <p className="text-xl">Rätt</p>
+            </div>
+            <div className="flex flex-row w-24 h-32 bg-red-opacity shadow-xl rounded-xl justify-center items-center">
+              <p className="text-4xl font-bold">0</p>
+              <p className="text-xl">Fel</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+  
+    return (
+        <div className="flex w-1/4 flex-col bg-base-100 justify-center items-center">
+            <UserIndicator />
+            <UserStats></UserStats>
+        </div>
+    );
+}
 
   export default Sidebar;

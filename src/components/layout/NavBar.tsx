@@ -2,6 +2,19 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { signIn, signOut, useSession } from "next-auth/react";
 import GoBackButton from "./GoBackButton";
+import { library, icon } from '@fortawesome/fontawesome-svg-core'
+import { faCamera, faQuestion } from '@fortawesome/free-solid-svg-icons'
+import ReactDOM from 'react-dom'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHippo } from "@fortawesome/free-solid-svg-icons";
+import { faHouse } from "@fortawesome/free-solid-svg-icons";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { faClipboardQuestion } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+
+
+
+
 
 const Navbar = () => {
   const router = useRouter();
@@ -15,7 +28,7 @@ const Navbar = () => {
   const UserIndicator = () => {
     if (sessionData) {
       return (
-        <div className="dropdown dropdown-end">
+        <div className="flex dropdown">
           <div className="avatar indicator">
             <span className="badge indicator-item badge-primary indicator-start text-xs font-bold">
               {String(sessionData.user.name)}
@@ -52,51 +65,23 @@ const Navbar = () => {
     }
   };
 
-  // Helper function to determine if a route is active
-  return (
-    <div className="navbar z-10 bg-base-100 pt-4">
-      <div className="navbar-start">
-        {currentPage != "quizmaster" ? (
-          <GoBackButton />
-        ) : (
-          <div className="dropdown">
-            <label tabIndex={0} className="btn btn-circle btn-ghost">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h7"
-                />
-              </svg>
-            </label>
-            {sessionData && (
-              <ul
-                tabIndex={0}
-                className="menu dropdown-content rounded-box menu-sm z-[1] mt-3 w-52 bg-neutral p-2 shadow"
-              >
-                <li>
-                  <a>Settings</a>
-                </li>
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
 
-      <div className="navbar-center">
-        <a className="btn btn-ghost text-xl">
-          {currentPage === "" ? "Startsida" : currentPage}
-        </a>
+  return (
+    <div className="flex w-32 flex-col bg-base-100 items-center">
+      <div className="flex prose text-center pt-5">
+        <h2 className="">
+          Arkino
+        </h2>
       </div>
-      <div className="navbar-end flex pr-2">
-        <UserIndicator />
+      <div className="flex h-2/3 flex-col justify-center">
+        <FontAwesomeIcon className="h-8 mb-20" icon={faHouse} />
+        <FontAwesomeIcon className="h-8 mb-20" icon={faClipboardQuestion} />
+        <FontAwesomeIcon className="h-8 mb-20" icon={faGear} />
+      </div>
+      <div className="flex h-3/5 flex-col justify-end">
+        <div className="flex justify-bottom">
+          <FontAwesomeIcon className="h-8 mb-10" icon={faArrowRightFromBracket} style={{ color: "#ff0000" }} />
+        </div>
       </div>
     </div>
   );
