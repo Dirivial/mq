@@ -9,7 +9,7 @@ import { personas } from '@dicebear/collection';
 
 
 
-/*
+
 const QuestionDetail: React.FC<{ question: Question }> = ({ question }) => {
     return (
       <div>
@@ -25,8 +25,74 @@ const QuestionDetail: React.FC<{ question: Question }> = ({ question }) => {
     );
   };
 
+  const QuestionsList: React.FC<{
+    questions: Question[];
+    onSelectQuestion: (index: number) => void;
+    }> = ({ questions, onSelectQuestion }) => {
+    const [selectedQuestionDetail, setSelectedQuestionDetail] = useState<number | null>(null);
 
-const Sidebar: React.FC<{
+    const showQuestionDetail = (index: number) => {
+      if (index >= 0 && index < questions.length) {
+        setSelectedQuestionDetail(index);
+      }
+    };
+
+    const closeQuestionDetail = () => {
+        setSelectedQuestionDetail(null);
+    };
+
+    const selectedQuestion = selectedQuestionDetail !== null ? questions[selectedQuestionDetail] : undefined;
+
+    return (
+      <div className="flex overflow-y-auto h-full max-h-full bg-black">
+        <table className="table w-full ">
+          <thead>
+            <tr>
+              <th>Nr</th>
+              <th>Fråga</th>
+              <th>Låt</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {questions.map((question, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-base-300" : ""}>
+                <th>{index + 1}</th>
+                <td>
+                  <button 
+                    className="btn btn-ghost btn-xs"
+                    onClick={() => showQuestionDetail(index)}>
+                    {question.name}
+                  </button>
+                </td>
+                <td>***</td>
+                <td>
+                  <button 
+                    className="btn btn-ghost btn-xs"
+                    onClick={() => onSelectQuestion(index)}>
+                    Redigera
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {selectedQuestion && (
+          <div className="modal modal-open">
+            <div className="modal-box">
+              <QuestionDetail question={selectedQuestion} />
+              <div className="modal-action">
+                <button className="btn btn-primary" onClick={closeQuestionDetail}>Stäng</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+};
+
+
+/**const Sidebar: React.FC<{
     questions: Question[];
     onSelectQuestion: (index: number) => void;
   }> = ({ questions, onSelectQuestion }) => {
@@ -90,15 +156,18 @@ const Sidebar: React.FC<{
         )}
       </div>
     );
-  };
-*/
+  };*/
 
 
 
-const Sidebar = () => {
-  const router = useRouter();
-  const { data: sessionData } = useSession();
-  const currentPage = String(router.pathname).split("/")[1];
+
+  const Sidebar: React.FC<{ questions?: Question[]; onSelectQuestion?: (index: number) => void }> = ({
+    questions,
+    onSelectQuestion,
+}) => {
+    const router = useRouter();
+    const { data: sessionData } = useSession();
+    const currentPage = router.pathname.split('/')[1];
 
   const handleSignOut = () => {
     void signOut({ callbackUrl: "/" });
@@ -172,12 +241,21 @@ const Sidebar = () => {
     }
   }
   
+  if (currentPage === 'quizmaster') {
     return (
         <div className="flex w-1/4 flex-col bg-base-100 justify-center items-center">
-            <UserIndicator />
-            <UserStats></UserStats>
+            <UserIndicator/>
+            <UserStats/>
         </div>
     );
+} else if (currentPage === 'quizcreator') {
+    return (
+        <QuestionsList questions={questions ?? []} onSelectQuestion={onSelectQuestion ?? (() => {null})} />
+    );
+} else {
+    // Optionally, return null or some default content for other pages
+    return null;
 }
+};
 
   export default Sidebar;
