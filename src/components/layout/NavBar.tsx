@@ -65,6 +65,8 @@ const Navbar = () => {
     }
   };
 
+  const getCardBgClass = (page: string) => currentPage === page ? 'bg-base-200' : 'bg-base-100';
+
 
   return (
     <div className="flex w-32 flex-col bg-base-100 items-center">
@@ -73,11 +75,26 @@ const Navbar = () => {
           Arkino
         </h2>
       </div>
-      <div className="flex h-2/3 flex-col justify-center">
-        <FontAwesomeIcon className="h-8 mb-20" icon={faHouse} />
-        <FontAwesomeIcon className="h-8 mb-20" icon={faClipboardQuestion} />
-        <FontAwesomeIcon className="h-8 mb-20" icon={faGear} />
+
+      <div className="flex h-2/3 w-2/3 flex-col justify-between mt-20">
+        <div className={`flex card h-1/5 rounded-full ${getCardBgClass('quizmaster')} justify-center`}>
+          <Link className="flex items-center justify-center" href="/quizmaster">
+            <FontAwesomeIcon className="h-8" icon={faHouse} />
+          </Link>
+        </div>
+        <div className={`flex card h-1/5 rounded-full ${getCardBgClass('quizcreator')} justify-center`}>
+          <Link className="flex items-center justify-center" href="/quizcreator">       
+            <FontAwesomeIcon className="h-8" icon={faClipboardQuestion} />
+            </Link>
+        </div>
+        {/* Leaving the settings page link empty as it's not present */}
+        <div className={`flex card h-1/5 rounded-full ${getCardBgClass('settings')} justify-center`}>
+          <Link className="flex items-center justify-center" href="#">
+            <FontAwesomeIcon className="h-8" icon={faGear} />
+          </Link>
+        </div>
       </div>
+
       <div className="flex h-3/5 flex-col justify-end">
         <div className="flex justify-bottom">
           <FontAwesomeIcon className="h-8 mb-10" icon={faArrowRightFromBracket} style={{ color: "#ff0000" }} />

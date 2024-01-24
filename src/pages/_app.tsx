@@ -28,7 +28,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <div className="flex flex-grow">
             <Component {...pageProps} />
           </div>
-          <Sidebar/>
         </div>
       </AuthContext.Provider>
     </SessionProvider>

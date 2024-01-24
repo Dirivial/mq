@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ConfigureMusicKit } from "~/utils/musicPlayer";
 import Script from "next/script";
 import { useState } from "react";
+import Sidebar from "~/components/layout/Sidebar";
 
 const qid = 1;
 
@@ -148,18 +149,20 @@ export default function QuizMaster() {
         src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
         onLoad={() => void tryAuthorize()} // Assuming tryAuthorize is defined elsewhere
       />
-      <main className="flex flex-auto flex-col items-center justify-center">
-        <div className="flex flex-col items-center md:flex-row">
-          <CreateQuizCard />
-          {!isAuthorized && (
-            <ActionButton
-              onClick={() => void tryAuthorize()}
-              label="Anslut till Apple Music"
-            />
-          )}
+      <div className="flex flex-1 justify-between">
+        <div className="flex flex-1 flex-col items-center justify-center">
+          <div className="flex flex-col items-center md:flex-row ">
+            <CreateQuizCard />
+            {!isAuthorized && (
+              <ActionButton
+                onClick={() => void tryAuthorize()}
+                label="Anslut till Apple Music"
+              />
+            )}
+          </div>
         </div>
-        <UserQuizzesList />
-      </main>
+          <Sidebar/>
+      </div>
     </>
   );
 }

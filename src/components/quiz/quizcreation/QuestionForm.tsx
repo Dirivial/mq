@@ -12,7 +12,7 @@ const AnswerInput: React.FC<{
         value={value}
         onChange={(e) => onChange(e.target.value, index)}
         placeholder={`Alternativ ${index + 1}`}
-        className="flex input input-bordered w-full input-primary"
+        className="flex input input-bordered w-full"
       />
     </div>
   );
@@ -24,7 +24,9 @@ const AnswerInputs: React.FC<{
 }> = ({ answers, onAnswerChange }) => {
   return (
     <div>
-    <p className='flex mb-0'>Fyll i svarsalternativen och välj det korrekta alternativet.</p>
+    <div className='prose'>
+        <h3 className='flex opacity-90 mb-0 mt-0'>Fyll i svarsalternativen och välj det korrekta alternativet.</h3>
+    </div>
     <div className="flex grid grid-cols-2 gap-2">
       {answers.map((answer, index) => (
         <AnswerInput key={index} value={answer.text} index={index} onChange={onAnswerChange} />
@@ -101,14 +103,16 @@ const NameQuestion: React.FC<{
   onChange: (value: string) => void;
 }> = React.memo(({ value, onChange }) => {
   return (
-    <div>
-      <p className='flex opacity-90 mb-0 mt-0'>Frågan som du vill att spelare ska svara på.</p>
+    <div className='flex flex-col w-full '>
+      <div className='prose'>
+        <h3 className='flex opacity-90 mb-0 mt-0'>Frågan som du vill att spelare ska svara på.</h3>
+      </div>
       <input 
         type="text" 
         value={value} 
         onChange={(e) => onChange(e.target.value)} 
         placeholder='Ställ din fråga...' 
-        className="flex input input-bordered input-primary w-full max-w-x" 
+        className="flex input input-bordered w-full max-w-x h-20" 
       />
     </div>
   );
@@ -121,8 +125,10 @@ const SelectCorrectAnswer: React.FC<{
 }> = ({ answers, correctAnswer, onCorrectAnswerChange }) => {
   return (
     <div className='flex flex-col w-full'>
-      <p className='flex mb-0'>Välj det korrekta svaret.</p>
-      <select className="select select-primary w-full" value={correctAnswer} onChange={(e) => onCorrectAnswerChange(parseInt(e.target.value))}>
+      <div className='prose'>
+        <h3 className='flex opacity-90 mb-0 mt-0'>Välj det korrekta svaret</h3>
+      </div>
+      <select className="select select-bordered w-full" value={correctAnswer} onChange={(e) => onCorrectAnswerChange(parseInt(e.target.value))}>
         <option disabled value={-1}>Välj det korrekta svaret</option>
         {answers.map((answer, index) => (
           <option key={index} value={index}>{answer.text || `Alternativ ${index + 1}`}</option>
@@ -164,17 +170,20 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   return (
     <div className='flex flex-col w-full h-full'>
       <div className="flex flex-grow bg-base-100 rounded">
-        <div className="flex flex-grow flex-col p-5">
-          <div className='flex flex-col text-center'>
+        <div className="flex flex-grow flex-col p-5 items-center justify-between">
+          <div className='flex flex-col text-center prose items-center '>
             <h1 className='-mb-3'>{String(quizName).toUpperCase()}</h1>
-            <p className='mt-0 mb-0 opacity-50'>quizets namn</p>
+            <p className='mt-0 mb-0 opacity-50'>QUIZETS NAMN</p>
           </div>
           <div className='flex flex-col w-full gap-2'>
             <NameQuestion value={questionName} onChange={onQuestionNameChange} />
             <SelectSong />
           </div>
-          <AnswerInputs answers={answers} onAnswerChange={onAnswerChange} />
+          <div className='flex flex-col w-full'>
+            <AnswerInputs answers={answers} onAnswerChange={onAnswerChange} />
+          </div>
           <SelectCorrectAnswer answers={answers} correctAnswer={correctAnswer} onCorrectAnswerChange={onCorrectAnswerChange} />
+
         </div>
       </div>
       <button className="btn btn-primary w-full mt-5" onClick={saveQuestion}>Lägg till fråga</button>

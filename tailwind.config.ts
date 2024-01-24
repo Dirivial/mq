@@ -5,8 +5,8 @@ const config: Config = {
   theme: {
     extend: {
     colors: {
-      'green-opacity': 'rgba(19, 78, 74, 0.222)', // new color with opacity
-      'red-opacity': 'rgba(80, 7, 36, 0.1)', // new color with opacity
+      'green-opacity': 'rgba(19, 190, 74, 0.5)', // new color with opacity
+      'red-opacity': 'rgba(190, 7, 36, 0.5)', // new color with opacity
     }},
     container: {
       center: true,
